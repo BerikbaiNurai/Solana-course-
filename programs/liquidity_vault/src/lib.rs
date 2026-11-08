@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 use anchor_spl::token::{Mint, Token, TokenAccount};
 
 // Replace with the keypair address after generating target/deploy/liquidity_vault-keypair.json.
-declare_id!("6YCpp3cTQMvukZUGsBFnCa2ti9o83V8ymugMsNEdWPwt");
+declare_id!("7deCasDiUCe9D4T4QD8RYMzxMameRDpeE1yZAv4J3o4S");
 
 #[program]
 pub mod liquidity_vault {

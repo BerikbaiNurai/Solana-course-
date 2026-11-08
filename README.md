@@ -46,13 +46,13 @@ PDA не имеет соответствующего приватного клю
 
 ### 1. Установите WSL2
 
-Откройте PowerShell **от имени администратора** и выполните:
+Сначала проверьте, установлен ли Ubuntu:
 
 ```powershell
-wsl --install -d Ubuntu
+wsl --list --verbose
 ```
 
-Перезагрузите Windows, если установщик попросит. Откройте Ubuntu из меню «Пуск» и задайте имя и пароль Linux-пользователя.
+Если Ubuntu уже есть в списке, запустите `wsl -d Ubuntu`. Если его нет, откройте PowerShell **от имени администратора** и выполните `wsl --install -d Ubuntu`. Перезагрузите Windows, если установщик попросит; затем откройте Ubuntu из меню «Пуск» и задайте имя и пароль Linux-пользователя.
 
 ### 2. Установите Rust, Node.js и инструменты Solana
 
@@ -90,7 +90,7 @@ solana --version
 anchor --version
 ```
 
-Ожидаемая версия Anchor CLI — `anchor-cli 0.31.1`.
+Ожидаемая версия Anchor CLI — `anchor-cli 0.31.1`. Установленная команда `solana --version` может показывать более новую версию CLI; для сборки Anchor использует закреплённый в `Anchor.toml` SBF toolchain Solana `2.1.0`.
 
 ### 3. Скачайте ветку проекта
 
@@ -99,6 +99,8 @@ git clone --branch week-8 https://github.com/BerikbaiNurai/Solana-course-.git
 cd Solana-course-
 yarn install
 ```
+
+В репозитории сохранён `Cargo.lock`: он фиксирует версии Rust-зависимостей, совместимые с SBF toolchain Solana 2.1. Не удаляйте его перед сборкой.
 
 ### 4. Создайте program ID и соберите программу
 
@@ -112,6 +114,8 @@ anchor build
 ```
 
 `anchor keys sync` обновит `declare_id!` в `lib.rs` и адрес программы в `Anchor.toml`. Keypair программы не добавляйте в Git. Это не кошелёк администратора.
+
+Указанный ниже devnet ID уже развернут. Файл program keypair намеренно не хранится в репозитории. Если вы создадите собственный keypair и запустите `anchor keys sync`, получится новый program ID для вашего отдельного деплоя.
 
 ### 5. Настройте кошелёк администратора в devnet
 
@@ -145,15 +149,35 @@ anchor deploy --provider.cluster devnet
 yarn setup:devnet
 ```
 
+Для прямого запуска скрипта задайте RPC и путь к кошельку, иначе Anchor не сможет создать provider из переменных окружения:
+
+```bash
+ANCHOR_PROVIDER_URL=https://api.devnet.solana.com \
+ANCHOR_WALLET="$HOME/.config/solana/id.json" \
+yarn setup:devnet
+```
+
 Скрипт создаст тестовый SPL mint с 6 decimals, затем vault и карточку администратора. В конце он напечатает адреса аккаунтов и Explorer-ссылки. Чтобы использовать существующий mint, передайте его адрес: `yarn setup:devnet <TOKEN_MINT_ADDRESS>`; mint должен уже существовать в devnet.
 
 Для открытия карточки другого кошелька вызовите `createUserCard` с подписью этого пользователя, PDA `vault_state` и PDA-карточки по seeds выше. Пользователь оплачивает создание собственной карточки.
 
-## Explorer и сдача
+## Devnet-деплой и аккаунты
 
-После `yarn setup:devnet` откройте напечатанные ссылки на `vault_state`, `token_vault`, `share_mint` и `user_card`. Все ссылки должны вести в devnet.
+Программа успешно собрана и развернута в Solana devnet. Проверка через Solana RPC подтвердила program account и все четыре аккаунта vault.
 
-Ссылки на фактические аккаунты появятся после деплоя и транзакции и зависят от program ID, mint и кошелька. До отправки транзакций таких адресов ещё нет.
+| Объект | Адрес | Explorer |
+|---|---|---|
+| Программа Liquidity Vault | `7deCasDiUCe9D4T4QD8RYMzxMameRDpeE1yZAv4J3o4S` | [Открыть программу](https://explorer.solana.com/address/7deCasDiUCe9D4T4QD8RYMzxMameRDpeE1yZAv4J3o4S?cluster=devnet) |
+| Кошелёк администратора / authority программы | `A4LCC3q4PZt3orzGqowwMyJE23Xb5hxg1aizq3DRpucj` | [Открыть кошелёк](https://explorer.solana.com/address/A4LCC3q4PZt3orzGqowwMyJE23Xb5hxg1aizq3DRpucj?cluster=devnet) |
+| Тестовый mint принимаемого SPL-токена | `3ZF2ErKWGGpZAK4HEWPTgk4kxF95avg5qEKSZS8R7fVm` | [Открыть mint](https://explorer.solana.com/address/3ZF2ErKWGGpZAK4HEWPTgk4kxF95avg5qEKSZS8R7fVm?cluster=devnet) |
+| `VaultState` PDA | `5tTHydct51S4mUeP3YHfgVkvv58fVQFQ2gxkbKGMmob6` | [Открыть настройки vault](https://explorer.solana.com/address/5tTHydct51S4mUeP3YHfgVkvv58fVQFQ2gxkbKGMmob6?cluster=devnet) |
+| Token custody PDA | `EQuEpnsP7Ld6tcbrG46ViJ5pMMA76fLnvNvZyyqTLxqp` | [Открыть хранилище](https://explorer.solana.com/address/EQuEpnsP7Ld6tcbrG46ViJ5pMMA76fLnvNvZyyqTLxqp?cluster=devnet) |
+| Share mint PDA | `FxNGzH6bM7u2nNSwR2vMYhhG72wJRQ9DwpCm3kiLpgAp` | [Открыть share mint](https://explorer.solana.com/address/FxNGzH6bM7u2nNSwR2vMYhhG72wJRQ9DwpCm3kiLpgAp?cluster=devnet) |
+| Карточка пользователя `UserCard` PDA | `4o6tfffq4AFVLXQ5sEMnh9HHeDXmVM83QcSns6hAw8h9` | [Открыть карточку](https://explorer.solana.com/address/4o6tfffq4AFVLXQ5sEMnh9HHeDXmVM83QcSns6hAw8h9?cluster=devnet) |
+
+Транзакции: [деплой программы](https://explorer.solana.com/tx/4Ln7FxDEatQRpbi1yMMvyLeq3Dhrk5cRZk3xN4qT84iH4mL8Q9vQRsZqUcf6AuJu5jbzEVg7Cxd5bTs4Sy9Es8yy?cluster=devnet), [создание vault](https://explorer.solana.com/tx/3mAmGZX9sm7WBQXcC8xWLKQpWGisQakc4JYWk1VSyCxNcGMC55Sw7nfe8oeUMb5fADMAtpf2e3LmBFXCUropns3M?cluster=devnet), [создание карточки](https://explorer.solana.com/tx/363a1iB1H72Rpc3EFtakYSxrYrfc3fSD7kBpkwRHdZfMRJn4L3vGzv8urtZVHG8DBgNjKQDjW2B3NPEMduxrMdwk?cluster=devnet).
+
+Приватные ключи кошелька и программы в репозитории не хранятся. Они остаются в локальной конфигурации WSL.
 
 ## Официальные инструкции
 

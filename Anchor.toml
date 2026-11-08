@@ -1,15 +1,16 @@
 [toolchain]
 anchor_version = "0.31.1"
+solana_version = "2.1.0"
 
 [features]
 seeds = false
 skip-lint = false
 
 [programs.localnet]
-liquidity_vault = "6YCpp3cTQMvukZUGsBFnCa2ti9o83V8ymugMsNEdWPwt"
+liquidity_vault = "7deCasDiUCe9D4T4QD8RYMzxMameRDpeE1yZAv4J3o4S"
 
 [programs.devnet]
-liquidity_vault = "6YCpp3cTQMvukZUGsBFnCa2ti9o83V8ymugMsNEdWPwt"
+liquidity_vault = "7deCasDiUCe9D4T4QD8RYMzxMameRDpeE1yZAv4J3o4S"
 
 [provider]
 cluster = "devnet"

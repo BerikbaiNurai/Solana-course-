@@ -27,7 +27,7 @@ async function main() {
     [Buffer.from("user_card"), vaultState.toBuffer(), admin.toBuffer()], program.programId
   );
 
-  await program.methods.initializeVault().accounts({
+  const initializeSignature = await program.methods.initializeVault().accounts({
     vaultState, tokenVault, shareMint, tokenMint, admin,
   }).rpc();
   const vaultSignature = await program.methods.createUserCard().accounts({
@@ -48,6 +48,7 @@ async function main() {
   ] as const) {
     console.log(`${label} Explorer: https://explorer.solana.com/address/${address}?cluster=devnet`);
   }
+  console.log(`Vault initialization transaction: https://explorer.solana.com/tx/${initializeSignature}?cluster=devnet`);
   console.log(`Card transaction: https://explorer.solana.com/tx/${vaultSignature}?cluster=devnet`);
 }
 
