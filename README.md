@@ -48,6 +48,7 @@ PDA не имеет соответствующего приватного клю
 2. Создайте отдельный program keypair (не кошелёк администратора):
 
    ```bash
+   New-Item -ItemType Directory -Force target/deploy
    solana-keygen new --no-bip39-passphrase -o target/deploy/liquidity_vault-keypair.json
    anchor keys sync
    ```
