@@ -1,0 +1,19 @@
+[toolchain]
+anchor_version = "0.31.1"
+
+[features]
+seeds = false
+skip-lint = false
+
+[programs.localnet]
+liquidity_vault = "6YCpp3cTQMvukZUGsBFnCa2ti9o83V8ymugMsNEdWPwt"
+
+[programs.devnet]
+liquidity_vault = "6YCpp3cTQMvukZUGsBFnCa2ti9o83V8ymugMsNEdWPwt"
+
+[provider]
+cluster = "devnet"
+wallet = "~/.config/solana/id.json"
+
+[scripts]
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"

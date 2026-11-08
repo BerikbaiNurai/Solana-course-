@@ -1,0 +1,13 @@
+target/
+node_modules/
+yarn-error.log
+.anchor/
+wallet.json
+id.json
+*.keypair.json
+target/deploy/*-keypair.json
+**/id.json
+.env
+.DS_Store
+.vscode/
+.idea/
