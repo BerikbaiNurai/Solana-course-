@@ -40,7 +40,14 @@ async function main() {
   console.log(`Token vault: ${tokenVault}`);
   console.log(`Share mint: ${shareMint}`);
   console.log(`User card: ${userCard}`);
-  console.log(`Explorer: https://explorer.solana.com/address/${vaultState}?cluster=devnet`);
+  for (const [label, address] of [
+    ["Vault state", vaultState],
+    ["Token vault", tokenVault],
+    ["Share mint", shareMint],
+    ["User card", userCard],
+  ] as const) {
+    console.log(`${label} Explorer: https://explorer.solana.com/address/${address}?cluster=devnet`);
+  }
   console.log(`Card transaction: https://explorer.solana.com/tx/${vaultSignature}?cluster=devnet`);
 }
 
