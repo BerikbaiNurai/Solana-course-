@@ -36,60 +36,26 @@ shares = amount × share_mint.supply / vault.total_deposited
 
 ### Что проверили
 
-`anchor build` собрал программу и IDL. `yarn tsc --noEmit` проверил TypeScript-скрипт для депозита. Сам депозит через эту версию в devnet пока не проводили: публичный faucet ограничил запрос тестового SOL, поэтому week-9 программа пока не обновлена в сети.
+`anchor build` собрал программу и IDL. Деплой программы и депозит в devnet завершились успешно; обе транзакции получили статус Finalized. Внесли 1 тестовый токен (mint с 6 decimals), пользователь получил 1 share-токен.
 
-## Как запустить
+## Аккаунты и транзакции в Devnet
 
-Нужны Rust stable, Node.js 22, Yarn, Solana CLI и Anchor CLI 0.31.1. Для Windows шаги установки WSL2/Ubuntu есть в [README недели 8](https://github.com/BerikbaiNurai/Solana-course-/blob/week-8/README.md). Также можно воспользоваться [официальной инструкцией Solana](https://solana.com/docs/intro/installation) и [инструкцией Anchor](https://www.anchor-lang.com/docs/installation).
+Неделя 9 развернута поверх версии недели 8 с теми же program ID и аккаунтами.
 
-```bash
-git clone --branch week-9 https://github.com/BerikbaiNurai/Solana-course-.git
-cd Solana-course-
-yarn install
-anchor build
-```
-
-Чтобы развернуть собственную копию, настройте devnet-кошелёк с тестовым SOL. Создайте program keypair, синхронизируйте ID, затем соберите и разверните программу:
-
-```bash
-mkdir -p target/deploy
-solana-keygen new --no-bip39-passphrase -o target/deploy/liquidity_vault-keypair.json
-anchor keys sync
-solana config set --url devnet
-anchor build
-anchor deploy --provider.cluster devnet
-```
-
-Program keypair и приватный ключ кошелька в репозитории не хранятся. После деплоя создайте mint, vault и карточку пользователя:
-
-```bash
-ANCHOR_PROVIDER_URL=https://api.devnet.solana.com \
-ANCHOR_WALLET="$HOME/.config/solana/id.json" \
-yarn setup:devnet
-```
-
-Для тестового mint, созданного `setup:devnet`, можно выпустить токены на кошелёк и сразу внести их. Скрипт создаст token ATA и share ATA, а если карточки ещё нет — откроет её:
-
-```bash
-ANCHOR_PROVIDER_URL=https://api.devnet.solana.com \
-ANCHOR_WALLET="$HOME/.config/solana/id.json" \
-yarn deposit:devnet <TOKEN_MINT_ADDRESS> 1.5 --mint-demo
-```
-
-`--mint-demo` работает, только если настроенный кошелёк является authority этого mint. Для другого токена уберите флаг и заранее пополните token account.
-
-## Аккаунты в Devnet
-
-Эти ссылки относятся к базовой версии недели 8. Ветка недели 9 содержит депозит в исходном коде, но эта версия ещё не развернута в devnet. После нового деплоя program ID и адреса аккаунтов будут зависеть от созданного keypair и mint.
-
-| Объект | Explorer |
+| Объект | Адрес и Explorer |
 |---|---|
-| Базовая программа | [7deCasDiUCe9D4T4QD8RYMzxMameRDpeE1yZAv4J3o4S](https://explorer.solana.com/address/7deCasDiUCe9D4T4QD8RYMzxMameRDpeE1yZAv4J3o4S?cluster=devnet) |
+| Программа Liquidity Vault | [7deCasDiUCe9D4T4QD8RYMzxMameRDpeE1yZAv4J3o4S](https://explorer.solana.com/address/7deCasDiUCe9D4T4QD8RYMzxMameRDpeE1yZAv4J3o4S?cluster=devnet) |
+| ProgramData | [HfuTjgLcVD52kqtwUWWzHbkrWVfKxBAEE7o5TBELb1Yh](https://explorer.solana.com/address/HfuTjgLcVD52kqtwUWWzHbkrWVfKxBAEE7o5TBELb1Yh?cluster=devnet) |
 | Mint тестового токена | [3ZF2ErKWGGpZAK4HEWPTgk4kxF95avg5qEKSZS8R7fVm](https://explorer.solana.com/address/3ZF2ErKWGGpZAK4HEWPTgk4kxF95avg5qEKSZS8R7fVm?cluster=devnet) |
 | `VaultState` | [5tTHydct51S4mUeP3YHfgVkvv58fVQFQ2gxkbKGMmob6](https://explorer.solana.com/address/5tTHydct51S4mUeP3YHfgVkvv58fVQFQ2gxkbKGMmob6?cluster=devnet) |
 | Token account vault | [EQuEpnsP7Ld6tcbrG46ViJ5pMMA76fLnvNvZyyqTLxqp](https://explorer.solana.com/address/EQuEpnsP7Ld6tcbrG46ViJ5pMMA76fLnvNvZyyqTLxqp?cluster=devnet) |
 | Share mint | [FxNGzH6bM7u2nNSwR2vMYhhG72wJRQ9DwpCm3kiLpgAp](https://explorer.solana.com/address/FxNGzH6bM7u2nNSwR2vMYhhG72wJRQ9DwpCm3kiLpgAp?cluster=devnet) |
 | Карточка пользователя | [4o6tfffq4AFVLXQ5sEMnh9HHeDXmVM83QcSns6hAw8h9](https://explorer.solana.com/address/4o6tfffq4AFVLXQ5sEMnh9HHeDXmVM83QcSns6hAw8h9?cluster=devnet) |
+| Token account пользователя | [4etSxC5m9xjRDuk7jmxC1eqwayHdFByQf3jowfZCJBPs](https://explorer.solana.com/address/4etSxC5m9xjRDuk7jmxC1eqwayHdFByQf3jowfZCJBPs?cluster=devnet) |
+| Share account пользователя | [82Ed4Q5ncmW1LWKjMWH7yEHNLvDhS8ZDKZVYt1SXH9dK](https://explorer.solana.com/address/82Ed4Q5ncmW1LWKjMWH7yEHNLvDhS8ZDKZVYt1SXH9dK?cluster=devnet) |
+
+- [Транзакция деплоя week-9](https://explorer.solana.com/tx/4RyQuFVfRh2BJFaBGiL4iS3oPPzya4YYBXLiLDXbEscEq3THrLsABrdAUFtGx46FrEc2D4hixLULdP17VMptDuhu?cluster=devnet), слот 520326963.
+- [Депозит 1 тестового токена и выпуск 1 share-токена](https://explorer.solana.com/tx/2acZRqaqJgYiX3zndDSUhKBs22UeSinMoJBktppYXzo6bMPoWD7sZCJFo1MKdDDB2pgGutWsbLhRsmAU1Vtpqvw2?cluster=devnet).
 
 ## Что мы поняли
 
