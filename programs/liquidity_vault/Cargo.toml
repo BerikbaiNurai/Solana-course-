@@ -1,7 +1,7 @@
 [package]
 name = "liquidity_vault"
 version = "0.1.0"
-description = "Week 8 liquidity vault scaffold"
+description = "Week 9 liquidity vault deposits and share tokens"
 edition = "2021"
 
 [lib]

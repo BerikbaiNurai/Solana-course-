@@ -1,6 +1,6 @@
-# Liquidity Vault — каркас недели 8
+# Liquidity Vault — неделя 9: депозит и share-токены
 
-Учебная Anchor-программа для РК1. Она создаёт структуру vault в Solana devnet: настройки, PDA-хранилище принимаемого SPL-токена, mint share-токена и персональную PDA-карточку. Инструкций для депозита и вывода здесь пока нет — на этом этапе средства ещё не перемещаются.
+Учебная Anchor-программа на Anchor. Она создаёт vault и пользовательские PDA-карточки, принимает SPL-токены пользователя, переводит их в PDA-хранилище и выпускает share-токены как квитанции о доле пользователя. Вывод токенов и размещение в стороннем liquidity pool относятся к следующим этапам.
 
 ## Схема аккаунтов
 
@@ -25,9 +25,9 @@ flowchart TD
 | Аккаунт | Владелец / authority | Содержимое |
 |---|---|---|
 | `VaultState` | программа (PDA) | администратор, mint принимаемого токена, адреса хранилища и share mint, общий внесённый объём, bump |
-| `TokenAccount` хранилища | `VaultState` PDA | SPL-токены vault; на неделе 8 баланс остаётся нулевым |
-| `Mint` share-токена | mint authority — `VaultState` PDA | receipt-токен с 6 decimals; в этой версии выпуск ещё не открыт |
-| `UserCard` | программа (PDA) | vault, владелец, сумма внесённых токенов (пока 0), bump |
+| `TokenAccount` хранилища | `VaultState` PDA | SPL-токены, переведённые пользователями в vault |
+| `Mint` share-токена | mint authority — `VaultState` PDA | receipt-токен; decimals совпадают с принимаемым mint |
+| `UserCard` | программа (PDA) | vault, владелец, суммарно внесённые токены, bump |
 
 PDA не имеет соответствующего приватного ключа. Программа проверяет seeds и bump при каждом доступе. Поэтому только её инструкции смогут подписать CPI от имени `VaultState` для управления токен-аккаунтом и выпуска share-токенов.
 
@@ -39,6 +39,23 @@ PDA не имеет соответствующего приватного клю
 - Карточка: `["user_card", vault_state, user_wallet]`
 
 Карточка пользователя однозначно выводится из адресов vault и кошелька; отдельный список пользователей хранить не нужно. В одном vault для одного кошелька может быть одна карточка.
+
+## Депозит и расчёт доли
+
+Инструкция `deposit(amount)` проверяет, что пользователь подписал транзакцию, его карточка принадлежит этому vault, а его SPL-аккаунты используют правильные mint и authority. Затем Anchor CPI вызывает SPL Token Program:
+
+1. `transfer` переводит `amount` из токен-аккаунта пользователя в PDA-хранилище.
+2. `mint_to` выпускает share-токены на share-аккаунт пользователя. Для подписи mint authority программа использует seeds и bump `VaultState` PDA.
+3. `total_deposited` в настройках vault и `deposited` в карточке пользователя увеличиваются на внесённую сумму.
+
+Формула выпуска использует supply share mint как общее количество долей, поэтому отдельное поле `total_shares` не дублирует состояние:
+
+```text
+Первый депозит:       shares = amount
+Следующие депозиты:   shares = amount × share_mint.supply / vault.total_deposited
+```
+
+Расчёт выполняется с промежуточной точностью `u128`; нулевой депозит, переполнение и депозит, округляющийся до нуля shares, отклоняются. Share mint использует те же decimals, что и принимаемый токен, чтобы 1:1 при первом депозите означало одинаковое число минимальных единиц.
 
 ## Установка инструментов на Windows
 
@@ -95,7 +112,7 @@ anchor --version
 ### 3. Скачайте ветку проекта
 
 ```bash
-git clone --branch week-8 https://github.com/BerikbaiNurai/Solana-course-.git
+git clone --branch week-9 https://github.com/BerikbaiNurai/Solana-course-.git
 cd Solana-course-
 yarn install
 ```
@@ -146,16 +163,28 @@ solana airdrop 2
 
 ```bash
 anchor deploy --provider.cluster devnet
-yarn setup:devnet
-```
-
-Для прямого запуска скрипта задайте RPC и путь к кошельку, иначе Anchor не сможет создать provider из переменных окружения:
-
-```bash
 ANCHOR_PROVIDER_URL=https://api.devnet.solana.com \
 ANCHOR_WALLET="$HOME/.config/solana/id.json" \
 yarn setup:devnet
 ```
+
+После деплоя можно внести депозит с настроенного кошелька. Скрипт создаст ATA для токена и share-токена, а при отсутствии карточки откроет её. Сумма вводится в обычных токенах:
+
+```bash
+ANCHOR_PROVIDER_URL=https://api.devnet.solana.com \
+ANCHOR_WALLET="$HOME/.config/solana/id.json" \
+yarn deposit:devnet <TOKEN_MINT_ADDRESS> 1.5
+```
+
+Для тестового mint, созданного командой `yarn setup:devnet`, его authority является тот же кошелёк. Флаг `--mint-demo` сначала выпустит на этот кошелёк указанную сумму тестовых токенов, затем внесёт их в vault:
+
+```bash
+ANCHOR_PROVIDER_URL=https://api.devnet.solana.com \
+ANCHOR_WALLET="$HOME/.config/solana/id.json" \
+yarn deposit:devnet <TOKEN_MINT_ADDRESS> 1.5 --mint-demo
+```
+
+`--mint-demo` работает только если настроенный кошелёк является mint authority принимаемого токена. Для обычного mint опустите флаг и заранее пополните свой token account.
 
 Скрипт создаст тестовый SPL mint с 6 decimals, затем vault и карточку администратора. В конце он напечатает адреса аккаунтов и Explorer-ссылки. Чтобы использовать существующий mint, передайте его адрес: `yarn setup:devnet <TOKEN_MINT_ADDRESS>`; mint должен уже существовать в devnet.
 
@@ -163,7 +192,7 @@ yarn setup:devnet
 
 ## Devnet-деплой и аккаунты
 
-Программа успешно собрана и развернута в Solana devnet. Проверка через Solana RPC подтвердила program account и все четыре аккаунта vault.
+Ссылки ниже — на программу и аккаунты devnet, созданные для недели 8. Код недели 9 с инструкцией депозита собирается локально, но ещё не развернут в эту devnet-программу. Чтобы выполнить депозит, разверните сборку недели 9 и создайте для неё новый vault по шагам 4–6 выше; при новом program keypair адрес программы изменится.
 
 | Объект | Адрес | Explorer |
 |---|---|---|

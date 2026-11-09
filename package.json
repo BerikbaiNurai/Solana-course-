@@ -1,11 +1,12 @@
 {
-  "name": "liquidity-vault-week-8",
+  "name": "liquidity-vault-week-9",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "build": "anchor build",
     "deploy:devnet": "anchor deploy --provider.cluster devnet",
-    "setup:devnet": "tsx scripts/setup-vault.ts"
+    "setup:devnet": "tsx scripts/setup-vault.ts",
+    "deposit:devnet": "tsx scripts/deposit-vault.ts"
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.31.1",
