@@ -23,6 +23,7 @@ pub mod liquidity_vault {
         card.vault = ctx.accounts.vault_state.key();
         card.owner = ctx.accounts.user.key();
         card.deposited = 0;
+        card.shares = 0;
         card.bump = ctx.bumps.user_card;
         Ok(())
     }
@@ -53,6 +54,7 @@ pub mod liquidity_vault {
         }, &[seeds]), shares)?;
         ctx.accounts.vault_state.total_deposited = total;
         ctx.accounts.user_card.deposited = user_total;
+        ctx.accounts.user_card.shares = ctx.accounts.user_card.shares.checked_add(shares).ok_or(VaultError::MathOverflow)?;
         Ok(())
     }
 
@@ -79,6 +81,8 @@ pub mod liquidity_vault {
             from: ctx.accounts.token_vault.to_account_info(), to: ctx.accounts.user_token_account.to_account_info(), authority: ctx.accounts.vault_state.to_account_info(),
         }, &[seeds]), tokens)?;
         ctx.accounts.vault_state.total_deposited = remaining;
+        ctx.accounts.user_card.deposited = ctx.accounts.user_card.deposited.saturating_sub(tokens);
+        ctx.accounts.user_card.shares = ctx.accounts.user_card.shares.saturating_sub(shares);
         Ok(())
     }
 }
@@ -113,8 +117,8 @@ pub struct VaultState { pub admin: Pubkey, pub token_mint: Pubkey, pub token_vau
 impl VaultState { pub const SPACE: usize = 8 + 32 + 32 + 32 + 32 + 8 + 1; }
 
 #[account]
-pub struct UserCard { pub vault: Pubkey, pub owner: Pubkey, pub deposited: u64, pub bump: u8 }
-impl UserCard { pub const SPACE: usize = 8 + 32 + 32 + 8 + 1; }
+pub struct UserCard { pub vault: Pubkey, pub owner: Pubkey, pub deposited: u64, pub shares: u64, pub bump: u8 }
+impl UserCard { pub const SPACE: usize = 8 + 32 + 32 + 8 + 8 + 1; }
 
 #[derive(Accounts)]
 pub struct Deposit<'info> {
@@ -132,7 +136,7 @@ pub struct Deposit<'info> {
 pub struct Withdraw<'info> {
     #[account(mut, seeds = [b"vault", vault_state.token_mint.as_ref()], bump = vault_state.bump)] pub vault_state: Account<'info, VaultState>,
     #[account(address = vault_state.token_mint)] pub token_mint: Account<'info, Mint>,
-    #[account(seeds = [b"user_card", vault_state.key().as_ref(), user.key().as_ref()], bump = user_card.bump, constraint = user_card.vault == vault_state.key() @ VaultError::InvalidUserCard, constraint = user_card.owner == user.key() @ VaultError::InvalidUserCard)] pub user_card: Account<'info, UserCard>,
+    #[account(mut, seeds = [b"user_card", vault_state.key().as_ref(), user.key().as_ref()], bump = user_card.bump, constraint = user_card.vault == vault_state.key() @ VaultError::InvalidUserCard, constraint = user_card.owner == user.key() @ VaultError::InvalidUserCard)] pub user_card: Account<'info, UserCard>,
     #[account(mut, address = vault_state.token_vault, token::mint = vault_state.token_mint, token::authority = vault_state)] pub token_vault: Account<'info, TokenAccount>,
     #[account(mut, address = vault_state.share_mint, mint::authority = vault_state)] pub share_mint: Account<'info, Mint>,
     #[account(mut, token::mint = vault_state.token_mint, token::authority = user)] pub user_token_account: Account<'info, TokenAccount>,
