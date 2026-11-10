@@ -1,21 +1,29 @@
 {
-  "name": "liquidity-vault-week-9",
+  "name": "liquidity-vault-week-11",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "build": "anchor build",
     "deploy:devnet": "anchor deploy --provider.cluster devnet",
     "setup:devnet": "tsx scripts/setup-vault.ts",
-    "deposit:devnet": "tsx scripts/deposit-vault.ts"
+    "deposit:devnet": "tsx scripts/deposit-vault.ts",
+    "test": "anchor test --provider.cluster localnet",
+    "create:test-tokens:devnet": "tsx scripts/create-test-tokens.ts",
+    "create:clmm-pool:devnet": "tsx scripts/create-clmm-pool.ts"
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.31.1",
+    "@raydium-io/raydium-sdk-v2": "0.2.70-alpha",
     "@solana/spl-token": "^0.4.9",
-    "@solana/web3.js": "^1.95.4"
+    "@solana/web3.js": "^1.95.4",
+    "decimal.js": "10.6.0"
   },
   "devDependencies": {
+    "@types/bn.js": "^5.1.6",
     "@types/mocha": "^10.0.7",
     "@types/node": "^22.10.2",
+    "bn.js": "^5.2.1",
+    "mocha": "^11.7.5",
     "ts-mocha": "^10.0.0",
     "tsx": "^4.19.2",
     "typescript": "^5.3.3"

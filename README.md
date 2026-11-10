@@ -1,63 +1,75 @@
-# Liquidity Vault — Week 10: CPI and Withdrawals
+# Week 11 — AMM and Raydium CLMM
 
-This week I added the withdrawal part to my vault. A user can redeem share tokens and get their proportional amount of SPL tokens back. The program burns the shares first, then transfers tokens from the vault with its PDA as signer.
+This week I studied how an AMM prices swaps from the assets in a pool and how concentrated liquidity lets a liquidity provider choose a lower and upper price for a position. A position earns fees only while the market price is inside its chosen range. A wider range covers more prices; a narrower range uses capital more efficiently but can go out of range sooner.
 
-I used Anchor 0.31.1. This branch continues the Week 8 scaffold and Week 9 deposit flow.
+For the practical part, I prepared scripts to create two of my own SPL test tokens on Solana devnet and initialize a Raydium CLMM pool for the pair. The pool starts at a 1:1 price. This assignment asks for the test tokens and the pool, so I did not add a liquidity position or a swap.
 
-## What I built
-
-- `withdraw(shares)` accepts the number of share-token base units to redeem.
-- The program checks the user card, vault, mint, and token-account addresses and authorities.
-- It burns shares from the user's share-token account through the SPL Token Program.
-- It transfers the corresponding accepted tokens from the vault token account. The vault PDA signs this CPI with its seeds and bump.
-- It updates `VaultState.total_deposited` after the transfer.
-
-## Share calculation
-
-Withdrawals use the current vault totals, so the user receives their current fraction of the vault:
+## Account flow
 
 ```text
-tokens_out = shares × vault.total_deposited / share_mint.supply
+My devnet wallet
+  ├─ creates W11A and W11B mint accounts (6 decimals)
+  ├─ receives 1,000,000 of each test token
+  └─ pays transaction fees and account rent
+
+Raydium CLMM program (devnet)
+  └─ initializes the pool, its token vaults, and pool state
 ```
 
-The calculation uses `u128` for the intermediate multiplication and rounds down to token base units. The instruction rejects zero shares, shares above the user's balance, inconsistent vault totals, arithmetic overflow, and an amount that rounds down to zero.
+The test token mints use the standard SPL Token Program. The pool is initialized by Raydium's CLMM program, not by a new Anchor program in this repository. The pool state stores the selected fee configuration and initial square-root price. At this stage, I have not deposited tokens into the pool; that requires opening a separate CLMM position with a chosen price range.
 
-The user card's `deposited` value remains a record of gross deposits. The user's share-token balance is the current withdrawable claim, because shares can be transferred between wallets.
+## Create the devnet tokens and pool
 
-## Why the PDA signs the transfer
-
-The vault token account is controlled by the vault PDA. A normal wallet cannot sign for that address because a PDA has no private key. During the CPI, my program supplies the PDA seeds and bump with `new_with_signer`, so the Token Program can verify that the program authorized the transfer. The user signs the burn of their own shares.
-
-Both CPI calls are in the same Solana instruction. If the transfer fails after the burn call, the transaction is rolled back and the shares are not lost.
-
-## Build
-
-I used Rust stable, Node.js 22, Yarn, Solana CLI, and Anchor CLI 0.31.1:
+I used Node.js 22, Yarn, and the Raydium SDK v2. Install dependencies first:
 
 ```bash
 yarn install
-anchor build
-yarn tsc --noEmit
 ```
 
-The program ID is `7deCasDiUCe9D4T4QD8RYMzxMameRDpeE1yZAv4J3o4S`. The Week 9 devnet deposit is in the vault, so the program can be upgraded at the same address to try the new instruction. Before calling `withdraw`, build this branch and deploy it with the configured devnet wallet.
+Set the Solana CLI to devnet and make sure the configured wallet has devnet SOL for mint accounts, token accounts, pool accounts, and fees:
 
-## Devnet accounts from my Week 9 setup
+```bash
+solana config set --url devnet
+solana balance
+```
 
-| Account | Explorer |
-|---|---|
-| Program | [7deCasDiUCe9D4T4QD8RYMzxMameRDpeE1yZAv4J3o4S](https://explorer.solana.com/address/7deCasDiUCe9D4T4QD8RYMzxMameRDpeE1yZAv4J3o4S?cluster=devnet) |
-| Accepted token mint | [3ZF2ErKWGGpZAK4HEWPTgk4kxF95avg5qEKSZS8R7fVm](https://explorer.solana.com/address/3ZF2ErKWGGpZAK4HEWPTgk4kxF95avg5qEKSZS8R7fVm?cluster=devnet) |
-| Vault state | [5tTHydct51S4mUeP3YHfgVkvv58fVQFQ2gxkbKGMmob6](https://explorer.solana.com/address/5tTHydct51S4mUeP3YHfgVkvv58fVQFQ2gxkbKGMmob6?cluster=devnet) |
-| Vault token account | [EQuEpnsP7Ld6tcbrG46ViJ5pMMA76fLnvNvZyyqTLxqp](https://explorer.solana.com/address/EQuEpnsP7Ld6tcbrG46ViJ5pMMA76fLnvNvZyyqTLxqp?cluster=devnet) |
-| Share mint | [FxNGzH6bM7u2nNSwR2vMYhhG72wJRQ9DwpCm3kiLpgAp](https://explorer.solana.com/address/FxNGzH6bM7u2nNSwR2vMYhhG72wJRQ9DwpCm3kiLpgAp?cluster=devnet) |
-| User card | [4o6tfffq4AFVLXQ5sEMnh9HHeDXmVM83QcSns6hAw8h9](https://explorer.solana.com/address/4o6tfffq4AFVLXQ5sEMnh9HHeDXmVM83QcSns6hAw8h9?cluster=devnet) |
+The scripts use the devnet RPC endpoint and `~/.config/solana/id.json` by default. To use another keypair file, set `KEYPAIR`. The secret key stays local and must not be committed or shared.
 
-The Week 9 demo deposited 1 test token and minted 1 share token: [view deposit transaction](https://explorer.solana.com/tx/2acZRqaqJgYiX3zndDSUhKBs22UeSinMoJBktppYXzo6bMPoWD7sZCJFo1MKdDDB2pgGutWsbLhRsmAU1Vtpqvw2?cluster=devnet). I have not linked a Week 10 withdrawal transaction yet.
+Create the two test mints and mint 1,000,000 tokens of each to the wallet:
+
+```bash
+yarn create:test-tokens:devnet
+```
+
+The script asks before sending transactions and saves public mint addresses in `.week11-mints.json`, which is ignored by Git. Then initialize the pool:
+
+```bash
+yarn create:clmm-pool:devnet
+```
+
+The pool script shows the devnet program, selected fee tier, derived configuration PDA, and pool address before asking to submit the pool transaction. If creation succeeds, it prints Explorer links for the pool and transaction. Keep the mint file between the two commands and use the same wallet for both.
+
+## Devnet results
+
+I will add the live links here after I run and confirm the transactions with my devnet wallet:
+
+- W11A mint: pending
+- W11B mint: pending
+- Raydium CLMM pool: pending
+- Token creation transaction links: pending
+- Pool initialization transaction: pending
+
+Until those transactions are confirmed, the scripts and setup are ready, but no Week 11 token or pool address is being claimed as deployed.
 
 ## What I learned
 
-- Burning shares makes the supply reflect the remaining claims on the vault.
-- `new_with_signer` lets the program authorize a Token Program CPI using PDA seeds.
-- The PDA is the authority for the vault's token account, so the admin wallet cannot withdraw those tokens directly.
-- Keeping the burn and transfer in one instruction gives the withdrawal atomic behavior.
+- In a basic constant-product AMM, the reserves follow `x × y = k`; a swap changes the reserve ratio and therefore the price.
+- A CLMM position provides liquidity only between two tick boundaries instead of across the full price curve.
+- The fee tier sets the pool's trading fee, while tick spacing constrains which range boundaries can be used for positions.
+- A pool can be initialized before any liquidity position is opened. The pool alone is not yet usable for swaps with meaningful liquidity.
+
+## References
+
+- [Raydium CLMM guide](https://docs.raydium.io/products/clmm)
+- [Raydium official SDK v2 pool-creation example](https://github.com/raydium-io/raydium-sdk-V2-demo/blob/master/src/clmm/createPool.ts)
+- [Raydium program addresses](https://docs.raydium.io/reference/program-addresses)

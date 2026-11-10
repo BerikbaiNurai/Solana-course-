@@ -11,3 +11,5 @@ target/deploy/*-keypair.json
 .DS_Store
 .vscode/
 .idea/
+
+.week11-mints.json

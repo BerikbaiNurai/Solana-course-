@@ -1,5 +1,5 @@
 import * as anchor from "@coral-xyz/anchor";
-import { Program } from "@coral-xyz/anchor";
+import BN from "bn.js";
 import { createMint, createAccount, mintTo, getAccount, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { Keypair, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 import { strict as assert } from "assert";
@@ -9,7 +9,7 @@ import { strict as assert } from "assert";
 describe("liquidity_vault withdrawals", () => {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
-  const program = anchor.workspace.LiquidityVault as Program<any>;
+  const program: any = anchor.workspace.LiquidityVault;
   const admin = (provider.wallet as anchor.Wallet & { payer: Keypair }).payer;
   const userA = Keypair.generate();
   const userB = Keypair.generate();
@@ -28,12 +28,12 @@ describe("liquidity_vault withdrawals", () => {
   const fundUser = async (user: Keypair) => provider.sendAndConfirm(
     new Transaction().add(SystemProgram.transfer({fromPubkey: admin.publicKey, toPubkey: user.publicKey, lamports: 50_000_000})), [admin]
   );
-  const deposit = (user: Keypair, amount: number) => program.methods.deposit(new anchor.BN(amount)).accounts({
+  const deposit = (user: Keypair, amount: number) => program.methods.deposit(new BN(amount)).accounts({
     vaultState, tokenMint, userCard: cardPda(user.publicKey), tokenVault, shareMint,
     userTokenAccount: userTokens.get(user.publicKey.toBase58()), userShareAccount: userShares.get(user.publicKey.toBase58()),
     user: user.publicKey, tokenProgram: TOKEN_PROGRAM_ID,
   }).signers([user]).rpc();
-  const withdraw = (user: Keypair, shares: number) => program.methods.withdraw(new anchor.BN(shares)).accounts({
+  const withdraw = (user: Keypair, shares: number) => program.methods.withdraw(new BN(shares)).accounts({
     vaultState, tokenMint, userCard: cardPda(user.publicKey), tokenVault, shareMint,
     userTokenAccount: userTokens.get(user.publicKey.toBase58()), userShareAccount: userShares.get(user.publicKey.toBase58()),
     user: user.publicKey, tokenProgram: TOKEN_PROGRAM_ID,
