@@ -4,10 +4,10 @@ This week I added withdrawals to my vault. A user can burn share tokens and rece
 
 ## What I changed
 
-- Added a `withdraw` instruction that takes the amount of share tokens to redeem.
-- The program checks the vault, user card, mints, token accounts, and authorities before doing the CPIs.
-- The user's shares are burned with the SPL Token Program. The user signs this operation.
-- The accepted tokens are transferred from the vault token account with `new_with_signer` and the vault PDA seeds.
+- Added a `withdraw` instruction that takes the number of share tokens to redeem.
+- The program validates the vault, user card, mints, token accounts, and authorities.
+- The user's shares are burned through the SPL Token Program. The user signs this CPI.
+- Accepted tokens are transferred from the vault token account using `new_with_signer` and the vault PDA seeds.
 - The program updates the vault total and the user's recorded shares and deposited amount.
 - Zero withdrawals, an empty vault, invalid amounts, and arithmetic overflow are rejected.
 
@@ -19,13 +19,13 @@ The user receives their proportional part of the vault:
 amount_out = shares_to_burn * vault.total_deposited / share_mint.supply
 ```
 
-The multiplication uses `u128` before division to reduce overflow risk. The result is rounded down to token base units. If a transaction fails during either CPI, Solana rolls back the whole instruction, so the user does not lose shares without receiving tokens.
+The multiplication uses `u128` before division to reduce overflow risk. The result is rounded down to token base units. If either CPI fails, Solana rolls back the whole instruction, so shares are not burned without a successful token transfer.
 
 ## Why the vault PDA signs
 
 The vault token account is controlled by the vault PDA. A PDA has no private key, so a wallet cannot sign for it. My program uses the PDA seeds and bump with `new_with_signer` to authorize the Token Program transfer. The admin cannot directly move tokens from this account.
 
-## Run it locally
+## Run tests locally
 
 I tested this branch with Anchor 0.31.1, Node.js 22, Yarn, and the local validator:
 
@@ -36,13 +36,33 @@ corepack yarn tsc --noEmit
 corepack yarn test
 ```
 
-The integration suite has 12 scenarios covering initialization, opening a user card, deposits, successful withdrawals, full withdrawal, zero amounts, missing cards, and insufficient shares.
+The integration suite has 12 scenarios covering initialization, user cards, deposits, successful and full withdrawals, invalid amounts, missing cards, and insufficient shares.
 
-## Devnet status
+## Try the full flow on devnet
 
-The Week 9 program and vault links are below for reference. Week 10 was verified on localnet; I have not deployed this updated withdrawal instruction or made a Week 10 withdrawal transaction on devnet.
+The program is already deployed at the same program ID as Week 9. The configured wallet is the upgrade authority. Deploying the updated program and running the commands below sends devnet transactions and spends devnet SOL for fees and account rent. I did not submit those transactions automatically.
 
-The Week 10 user card includes additional share accounting. Existing Week 9 cards were created with the older account layout, so use a fresh vault/card for a deployment of this version or add an explicit migration before reusing the old cards. Do not assume an upgrade automatically changes existing account data.
+Use a fresh test vault for this version. The Week 10 user card stores share accounting, while existing Week 9 cards have the older layout. Upgrading the program does not migrate existing account data. The setup script below creates a new test token mint and vault, so it does not touch the old Week 9 deposit.
+
+```bash
+corepack yarn install
+anchor build
+anchor deploy --provider.cluster devnet
+corepack yarn setup:devnet
+```
+
+The setup command prints the new token mint address. Use that address in the next two commands. The demo flag mints test tokens only because the wallet created by setup is the test mint authority:
+
+```bash
+corepack yarn deposit:devnet <TOKEN_MINT_ADDRESS> 1 --mint-demo
+corepack yarn withdraw:devnet <TOKEN_MINT_ADDRESS> 1
+```
+
+The withdrawal command burns 1 share token and returns the proportional accepted token amount. It prints the transaction link and the balances after the withdrawal. Use only the new test mint printed by setup, not the Week 9 mint below.
+
+## Week 9 devnet accounts
+
+These links are the previous week's setup and are included for reference. Week 10 localnet tests passed; I have not yet recorded a Week 10 devnet withdrawal transaction.
 
 | Account | Week 9 devnet explorer |
 |---|---|
