@@ -47,7 +47,7 @@ Use a fresh test vault for this version. The Week 10 user card stores share acco
 ```bash
 corepack yarn install
 anchor build
-anchor deploy --provider.cluster devnet
+anchor upgrade target/deploy/liquidity_vault.so --program-id 7deCasDiUCe9D4T4QD8RYMzxMameRDpeE1yZAv4J3o4S --provider.cluster devnet
 corepack yarn setup:devnet
 ```
 
