@@ -86,5 +86,21 @@ describe("liquidity_vault withdrawals", () => {
   });
   it("rejects withdrawing zero shares", async () => mustFail(() => withdraw(userA, 0)));
   it("rejects withdrawing more shares than the user owns", async () => mustFail(() => withdraw(userA, 51 * UNIT)));
-  it("requires a user card before withdrawal", async () => mustFail(() => withdraw(userWithoutCard, UNIT)));
+  it("requires a user card before withdrawal", async () => mustFail(() => withdraw(userWithoutCard, UNIT))); 
+  it("keeps the vault total consistent after withdrawals", async () => {
+    const vault = await program.account.vaultState.fetch(vaultState);
+    assert.equal(vault.totalDeposited.toNumber(), 50 * UNIT);
+  });
+  it("tracks the user's remaining shares in their card", async () => {
+    const card = await program.account.userCard.fetch(cardPda(userA.publicKey));
+    assert.equal(card.deposited.toNumber(), 50 * UNIT);
+    assert.equal(card.owner.toBase58(), userA.publicKey.toBase58());
+    assert.equal(card.shares.toNumber(), 50 * UNIT);
+  });
+  it("rejects creating a second card for the same user", async () => {
+    await mustFail(() => program.methods.createUserCard().accounts({vaultState, userCard: cardPda(userA.publicKey), user: userA.publicKey, systemProgram: SystemProgram.programId}).signers([userA]).rpc());
+  });
+  it("requires a user card before deposit", async () => mustFail(() => deposit(userWithoutCard, UNIT)));
+  it("rejects depositing zero tokens", async () => mustFail(() => deposit(userA, 0)));
+
 });
