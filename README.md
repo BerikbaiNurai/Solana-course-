@@ -51,15 +51,16 @@ The pool script shows the devnet program, selected fee tier, derived configurati
 
 ## Devnet results
 
-I will add the live links here after I run and confirm the transactions with my devnet wallet:
+I created both tokens and initialized the CLMM pool with my devnet wallet. All three transactions are finalized:
 
-- W11A mint: pending
-- W11B mint: pending
-- Raydium CLMM pool: pending
-- Token creation transaction links: pending
-- Pool initialization transaction: pending
+- W11A mint: [jSmbzFUSKYLaYrcm9cbgDyV7vxKLKXcVP9sv7jwjcrs](https://explorer.solana.com/address/jSmbzFUSKYLaYrcm9cbgDyV7vxKLKXcVP9sv7jwjcrs?cluster=devnet)
+- W11B mint: [JAGfeWQD8ZUi2kkHUF7pBR7SakND9NMugUQ1PmCnkjyY](https://explorer.solana.com/address/JAGfeWQD8ZUi2kkHUF7pBR7SakND9NMugUQ1PmCnkjyY?cluster=devnet)
+- Raydium CLMM pool: [HGuzZ8Ee9sCnHF7i5XUBRfT5yFNe37HavsACLGzAQdDA](https://explorer.solana.com/address/HGuzZ8Ee9sCnHF7i5XUBRfT5yFNe37HavsACLGzAQdDA?cluster=devnet)
+- W11A creation and mint transaction: [view on Explorer](https://explorer.solana.com/tx/4zaBJ5hBzRArp5ZngX1fkjnhkWuueHdeTc6UGjVdM9DTVWofYETvwXHDmfum7iFQzaWtAfZSwsvtPEvUW3f3RNR5?cluster=devnet)
+- W11B creation and mint transaction: [view on Explorer](https://explorer.solana.com/tx/26miQkSZc871WGH5f2HFCPLEJXJMnS4NEZzMWcTAPLzH9p3nJBNNKTPD5iHH7K26Hur7bau6dZ5Mgm9FvMp5qAUE?cluster=devnet)
+- Pool initialization transaction: [view on Explorer](https://explorer.solana.com/tx/kjrpr4VEoqD7i9sBhXhQw5yGeptntQzmERDy7FV1zeFtUuqR9VMeJx5CqYrN9t6MNVmCNyTCtWUmV36pgZRL3cN?cluster=devnet)
 
-Until those transactions are confirmed, the scripts and setup are ready, but no Week 11 token or pool address is being claimed as deployed.
+The pool was created with fee tier index 0, trade fee rate 2,500, and tick spacing 60. It has no liquidity position yet, since opening a position is outside this week's stated requirement.
 
 ## What I learned
 
