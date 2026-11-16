@@ -29,7 +29,16 @@ async function main() {
   const raydium = await Raydium.load({ connection, owner, cluster: "devnet", disableFeatureCheck: true, disableLoadToken: true });
   if (!DEVNET_PROGRAM_ID.CLMM_PROGRAM_ID.equals(new PublicKey("DRayAUgENGQBKVaX8owNhgzkEDyoHTGVEGHVJT1E9pfH"))) throw new Error("Unexpected Raydium devnet CLMM program ID.");
   const poolId = new PublicKey(POOL_ID);
-  const { poolInfo, poolKeys } = await raydium.clmm.getPoolInfoFromRpc(POOL_ID);
+  // getPoolInfoFromRpc calls Object.values() on the tick-array result and
+  // throws when a newly initialized pool has no positions yet. Simple pool
+  // info is enough to open the first position and works for an empty pool.
+  const { poolInfo, rpcData } = await raydium.clmm.getSimplePoolInfo(poolId);
+  const poolKeys = {
+    vault: {
+      A: rpcData.vaultA.toBase58(),
+      B: rpcData.vaultB.toBase58(),
+    },
+  };
   if (!new PublicKey(poolInfo.programId).equals(DEVNET_PROGRAM_ID.CLMM_PROGRAM_ID)) throw new Error("The selected pool is not a devnet Raydium CLMM pool.");
   const decimals = poolInfo.mintA.decimals;
   const amount = new BN(BASE_AMOUNT_TOKENS).mul(new BN(10).pow(new BN(decimals)));
@@ -37,9 +46,9 @@ async function main() {
   const upperTick = TickUtil.toTickIndex(TickUtil.priceToTick(UPPER_PRICE, decimals, poolInfo.mintB.decimals), poolInfo.config.tickSpacing);
   console.log(`Wallet: ${owner.publicKey.toBase58()}`);
   console.log(`Pool: ${poolId.toBase58()}`);
-  console.log(`Pair: ${poolInfo.mintA.symbol}/${poolInfo.mintB.symbol}`);
+  console.log(`Pair: ${poolInfo.mintA.address}/${poolInfo.mintB.address}`);
   console.log(`Initial range: ${LOWER_PRICE.toString()} to ${UPPER_PRICE.toString()} B per A`);
-  console.log(`Base deposit: ${BASE_AMOUNT_TOKENS} ${poolInfo.mintA.symbol}; maximum other side: ${BASE_AMOUNT_TOKENS * 2} ${poolInfo.mintB.symbol}`);
+  console.log(`Base deposit: ${BASE_AMOUNT_TOKENS} token A; maximum other side: ${BASE_AMOUNT_TOKENS * 2} token B`);
   console.log("This creates a small test liquidity position so the Week 12 vault swap has liquidity to trade against.");
   if (!(await confirm("Open this test position on devnet?"))) { console.log("Cancelled. No transaction was sent."); return; }
 

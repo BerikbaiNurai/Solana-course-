@@ -1,5 +1,5 @@
 import * as anchor from "@coral-xyz/anchor";
-import { DEVNET_PROGRAM_ID, getPdaExBitmapAccount, Raydium, swapInternal, TickArrayBitmapExtensionLayout } from "@raydium-io/raydium-sdk-v2";
+import { DEVNET_PROGRAM_ID, getPdaExBitmapAccount, getPdaObservationAccount, Raydium, swapInternal, TickArrayBitmapExtensionLayout } from "@raydium-io/raydium-sdk-v2";
 import { getAccount, getOrCreateAssociatedTokenAccount, TOKEN_PROGRAM_ID, TOKEN_2022_PROGRAM_ID } from "@solana/spl-token";
 import { Connection, Keypair, PublicKey } from "@solana/web3.js";
 import BN from "bn.js";
@@ -45,7 +45,9 @@ async function main() {
   const poolId = new PublicKey(poolIdArgument);
 
   const raydium = await Raydium.load({ connection, owner, cluster: "devnet", disableFeatureCheck: true, disableLoadToken: true });
-  const { poolInfo, poolKeys } = await raydium.clmm.getPoolInfoFromRpc(poolIdArgument);
+  // Use the simple RPC path: getPoolInfoFromRpc throws on a pool with no
+  // initialized tick arrays, which is exactly the case before seeding liquidity.
+  const { poolInfo, rpcData: poolRpcData } = await raydium.clmm.getSimplePoolInfo(poolId);
   if (!new PublicKey(poolInfo.programId).equals(DEVNET_PROGRAM_ID.CLMM_PROGRAM_ID)) throw new Error("The selected pool is not a devnet Raydium CLMM pool.");
   const mintA = new PublicKey(poolInfo.mintA.address);
   const mintB = new PublicKey(poolInfo.mintB.address);
@@ -92,7 +94,7 @@ async function main() {
 
   console.log(`Wallet: ${user.toBase58()}`);
   console.log(`Pool: ${poolId.toBase58()}`);
-  console.log(`Swap: ${amountArgument} ${zeroForOne ? poolInfo.mintA.symbol : poolInfo.mintB.symbol} exact input`);
+  console.log(`Swap: ${amountArgument} ${inputMint.toBase58()} exact input into ${outputMint.toBase58()}`);
   console.log(`Expected output: ${quote.amountCalculated.toString()} base units`);
   console.log(`Slippage limit: ${slippageBps} bps; minimum output: ${minAmountOut.toString()} base units`);
   console.log("The program burns the corresponding shares, swaps from the vault PDA, and sends output tokens to the signer. Raydium rejects output below the minimum.");
@@ -109,13 +111,13 @@ async function main() {
     outputMint,
     userCard,
     user,
-    ammConfig: new PublicKey(poolKeys.config.id),
+    ammConfig: new PublicKey(poolInfo.config.id),
     poolState: poolId,
-    poolTokenVault0: new PublicKey(poolKeys.vault.A),
-    poolTokenVault1: new PublicKey(poolKeys.vault.B),
+    poolTokenVault0: poolRpcData.vaultA,
+    poolTokenVault1: poolRpcData.vaultB,
     poolMint0: mintA,
     poolMint1: mintB,
-    observationState: new PublicKey(poolKeys.observationId),
+    observationState: getPdaObservationAccount(programId, poolId).publicKey,
     clmmProgram: programId,
     tokenProgram: TOKEN_PROGRAM_ID,
     tokenProgram2022: TOKEN_2022_PROGRAM_ID,

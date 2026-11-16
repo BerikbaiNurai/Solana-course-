@@ -24,7 +24,7 @@ I used the Week 11 test pair:
 - W11B: `JAGfeWQD8ZUi2kkHUF7pBR7SakND9NMugUQ1PmCnkjyY`
 - CLMM pool: `HGuzZ8Ee9sCnHF7i5XUBRfT5yFNe37HavsACLGzAQdDA`
 
-The Week 11 pool was created without an active liquidity position, so it needs test liquidity before a swap can execute. I added the seed script below, but my devnet run stopped in Raydium SDK `getPoolInfoFromRpc` with `TypeError: Cannot convert undefined or null to object`, before sending a transaction. The position and swap still need to be completed after fixing that client-side error.
+The Week 11 pool was created without an active liquidity position, so it needs test liquidity before a swap can execute. I changed the seed and swap scripts to use Raydium SDK `getSimplePoolInfo`; unlike `getPoolInfoFromRpc`, it can read a pool before any tick arrays exist. I confirmed it reads the empty Week 11 pool. I have not sent the liquidity transaction yet because the currently available local wallet has no devnet SOL or Week 11 test tokens.
 
 Install dependencies and build/deploy the updated vault program:
 
@@ -52,7 +52,7 @@ The last argument is slippage in basis points: `100` means 1%. The script shows 
 
 ## Devnet results
 
-The vault program was upgraded on devnet with the Week 12 CPI instruction. I still need to seed the pool, create a W11A vault, deposit tokens, and submit the swap before this demo is complete.
+The vault program was upgraded on devnet with the Week 12 CPI instruction. I still need a funded wallet that owns the Week 11 test tokens to seed the pool, create a W11A vault, deposit tokens, and submit the swap before this demo is complete.
 
 - Program upgrade: [transaction](https://explorer.solana.com/tx/7bFF65ek6Rbk8A1EiL8bQhXeTtribuZ5xhqFcWaZmdfWhyhNcsGDSmyUtyGJUgTRVwvXA5Wakno7GyTD6U3PKu4?cluster=devnet) · [program](https://explorer.solana.com/address/7deCasDiUCe9D4T4QD8RYMzxMameRDpeE1yZAv4J3o4S?cluster=devnet)
 - Test liquidity position: not opened yet
