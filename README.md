@@ -52,9 +52,9 @@ The last argument is slippage in basis points: `100` means 1%. The script shows 
 
 ## Devnet results
 
-The code and commands are ready, but I have not run the Week 12 program upgrade or swap transaction yet. I will add the Explorer links here after the devnet transactions are confirmed.
+The vault program was upgraded on devnet with the Week 12 CPI instruction. I still need to seed the pool, create a W11A vault, deposit tokens, and submit the swap before this demo is complete.
 
-- Program upgrade: not run for Week 12
+- Program upgrade: [transaction](https://explorer.solana.com/tx/7bFF65ek6Rbk8A1EiL8bQhXeTtribuZ5xhqFcWaZmdfWhyhNcsGDSmyUtyGJUgTRVwvXA5Wakno7GyTD6U3PKu4?cluster=devnet) · [program](https://explorer.solana.com/address/7deCasDiUCe9D4T4QD8RYMzxMameRDpeE1yZAv4J3o4S?cluster=devnet)
 - Test liquidity position: not opened yet
 - W11A vault state and deposit: not created yet
 - Vault-to-CLMM swap transaction: not submitted yet
