@@ -24,7 +24,7 @@ I used the Week 11 test pair:
 - W11B: `JAGfeWQD8ZUi2kkHUF7pBR7SakND9NMugUQ1PmCnkjyY`
 - CLMM pool: `HGuzZ8Ee9sCnHF7i5XUBRfT5yFNe37HavsACLGzAQdDA`
 
-The Week 11 pool was created without an active liquidity position. Before the swap demo, the seed script below opens a small external test position so the pool can fill the trade. That wallet position is only pool liquidity; the swap still spends tokens from the vault PDA and burns the user's shares.
+The Week 11 pool was created without an active liquidity position, so it needs test liquidity before a swap can execute. I added the seed script below, but my devnet run stopped in Raydium SDK `getPoolInfoFromRpc` with `TypeError: Cannot convert undefined or null to object`, before sending a transaction. The position and swap still need to be completed after fixing that client-side error.
 
 Install dependencies and build/deploy the updated vault program:
 
