@@ -37,7 +37,7 @@ async function main() {
   const connection = new Connection(RPC_URL, "confirmed");
   const provider = new anchor.AnchorProvider(connection, new anchor.Wallet(owner), { commitment: "confirmed" });
   anchor.setProvider(provider);
-  const idl = JSON.parse(readFileSync("target/idl/liquidity_vault.json", "utf8"));
+  const idl = JSON.parse(readFileSync("idl/liquidity_vault.json", "utf8"));
   idl.address = "7deCasDiUCe9D4T4QD8RYMzxMameRDpeE1yZAv4J3o4S";
   const program = new anchor.Program(idl, provider);
   const inputMint = new PublicKey(inputMintArgument);
@@ -84,11 +84,11 @@ async function main() {
   if (minAmountOut.isZero()) throw new Error("The minimum output rounded down to zero.");
 
   const [vaultState] = PublicKey.findProgramAddressSync([Buffer.from("vault"), inputMint.toBuffer()], program.programId);
-  const vault = await (program.account as any).vaultState.fetch(vaultState);
-  if (!(vault.tokenMint as PublicKey).equals(inputMint)) throw new Error("This vault was created for a different input mint.");
+  const [tokenVault] = PublicKey.findProgramAddressSync([Buffer.from("token_vault"), inputMint.toBuffer()], program.programId);
+  const [shareMint] = PublicKey.findProgramAddressSync([Buffer.from("share_mint"), inputMint.toBuffer()], program.programId);
   const user = owner.publicKey;
   const [userCard] = PublicKey.findProgramAddressSync([Buffer.from("user_card"), vaultState.toBuffer(), user.toBuffer()], program.programId);
-  const userShareAccount = await getOrCreateAssociatedTokenAccount(connection, owner, vault.shareMint, user);
+  const userShareAccount = await getOrCreateAssociatedTokenAccount(connection, owner, shareMint, user);
   const userOutputTokenAccount = await getOrCreateAssociatedTokenAccount(connection, owner, outputMint, user);
   const outputBefore = (await getAccount(connection, userOutputTokenAccount.address)).amount;
 
@@ -104,8 +104,8 @@ async function main() {
   const signature = await program.methods.swapFromVault(amountIn, minAmountOut).accounts({
     vaultState,
     inputMint,
-    tokenVault: vault.tokenVault,
-    shareMint: vault.shareMint,
+    tokenVault,
+    shareMint,
     userShareAccount: userShareAccount.address,
     userOutputTokenAccount: userOutputTokenAccount.address,
     outputMint,

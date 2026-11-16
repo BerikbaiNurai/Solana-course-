@@ -4,6 +4,7 @@ import {
   getMint,
   getOrCreateAssociatedTokenAccount,
   mintTo,
+  TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 import { PublicKey } from "@solana/web3.js";
 import { readFileSync } from "node:fs";
@@ -33,14 +34,20 @@ async function main() {
   const payer = (provider.wallet as anchor.Wallet).payer;
   const user = provider.wallet.publicKey;
   const tokenMint = new PublicKey(mintArgument);
-  const idl = JSON.parse(readFileSync("target/idl/liquidity_vault.json", "utf8"));
+  const idl = JSON.parse(readFileSync("idl/liquidity_vault.json", "utf8"));
   const program = new anchor.Program(idl, provider);
   const [vaultState] = PublicKey.findProgramAddressSync(
     [Buffer.from("vault"), tokenMint.toBuffer()],
     program.programId,
   );
-  const vault = await (program.account as any).vaultState.fetch(vaultState);
-  const shareMint = vault.shareMint as PublicKey;
+  const [tokenVault] = PublicKey.findProgramAddressSync(
+    [Buffer.from("token_vault"), tokenMint.toBuffer()],
+    program.programId,
+  );
+  const [shareMint] = PublicKey.findProgramAddressSync(
+    [Buffer.from("share_mint"), tokenMint.toBuffer()],
+    program.programId,
+  );
   const tokenAmountInfo = await getMint(provider.connection, tokenMint);
   const shareMintInfo = await getMint(provider.connection, shareMint);
   if (tokenAmountInfo.decimals !== shareMintInfo.decimals) {
@@ -85,6 +92,7 @@ async function main() {
       vaultState,
       userCard,
       user,
+      systemProgram: anchor.web3.SystemProgram.programId,
     }).rpc();
   }
 
@@ -92,11 +100,12 @@ async function main() {
     vaultState,
     tokenMint,
     userCard,
-    tokenVault: vault.tokenVault,
+    tokenVault,
     shareMint,
     userTokenAccount: userTokenAccount.address,
     userShareAccount: userShareAccount.address,
     user,
+    tokenProgram: TOKEN_PROGRAM_ID,
   }).rpc();
 
   const [tokensAfter, sharesAfter] = await Promise.all([

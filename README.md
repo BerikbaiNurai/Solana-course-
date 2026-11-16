@@ -16,6 +16,8 @@ User signs the request and authorizes burning shares
 
 I used the official Raydium CLMM CPI interface for Anchor 0.31.1. The program validates the selected pool, token pair, vault accounts, user card, and share balance before invoking Raydium. The pool is limited to Raydium's devnet CLMM program.
 
+The client IDL used by the setup, deposit, and swap scripts is checked in at `idl/liquidity_vault.json`. I kept the instruction account lists and argument types there so the scripts can build transactions without reading account state from a generated IDL.
+
 ## Devnet setup
 
 I used the Week 11 test pair:

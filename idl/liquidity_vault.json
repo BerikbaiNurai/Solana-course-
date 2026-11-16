@@ -1,0 +1,83 @@
+{
+  "address": "7deCasDiUCe9D4T4QD8RYMzxMameRDpeE1yZAv4J3o4S",
+  "metadata": {
+    "name": "liquidity_vault",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Week 12 client instructions for the liquidity vault"
+  },
+  "instructions": [
+    {
+      "name": "initializeVault",
+      "discriminator": [48, 191, 163, 44, 71, 129, 63, 164],
+      "accounts": [
+        { "name": "vaultState", "writable": true },
+        { "name": "tokenVault", "writable": true },
+        { "name": "shareMint", "writable": true },
+        { "name": "tokenMint" },
+        { "name": "admin", "writable": true, "signer": true },
+        { "name": "tokenProgram" },
+        { "name": "systemProgram" },
+        { "name": "rent" }
+      ],
+      "args": []
+    },
+    {
+      "name": "createUserCard",
+      "discriminator": [25, 67, 231, 22, 28, 170, 76, 39],
+      "accounts": [
+        { "name": "vaultState" },
+        { "name": "userCard", "writable": true },
+        { "name": "user", "writable": true, "signer": true },
+        { "name": "systemProgram" }
+      ],
+      "args": []
+    },
+    {
+      "name": "deposit",
+      "discriminator": [242, 35, 198, 137, 82, 225, 242, 182],
+      "accounts": [
+        { "name": "vaultState", "writable": true },
+        { "name": "tokenMint" },
+        { "name": "userCard", "writable": true },
+        { "name": "tokenVault", "writable": true },
+        { "name": "shareMint", "writable": true },
+        { "name": "userTokenAccount", "writable": true },
+        { "name": "userShareAccount", "writable": true },
+        { "name": "user", "signer": true },
+        { "name": "tokenProgram" }
+      ],
+      "args": [{ "name": "amount", "type": "u64" }]
+    },
+    {
+      "name": "swapFromVault",
+      "discriminator": [11, 213, 238, 33, 15, 61, 160, 17],
+      "accounts": [
+        { "name": "vaultState", "writable": true },
+        { "name": "inputMint" },
+        { "name": "tokenVault", "writable": true },
+        { "name": "shareMint", "writable": true },
+        { "name": "userShareAccount", "writable": true },
+        { "name": "userOutputTokenAccount", "writable": true },
+        { "name": "outputMint" },
+        { "name": "userCard", "writable": true },
+        { "name": "user", "signer": true },
+        { "name": "ammConfig" },
+        { "name": "poolState", "writable": true },
+        { "name": "poolTokenVault0", "writable": true },
+        { "name": "poolTokenVault1", "writable": true },
+        { "name": "poolMint0" },
+        { "name": "poolMint1" },
+        { "name": "observationState", "writable": true },
+        { "name": "clmmProgram" },
+        { "name": "tokenProgram" },
+        { "name": "tokenProgram2022" },
+        { "name": "memoProgram" }
+      ],
+      "args": [
+        { "name": "amountIn", "type": "u64" },
+        { "name": "minAmountOut", "type": "u64" }
+      ]
+    }
+  ]
+}

@@ -1,13 +1,13 @@
 import * as anchor from "@coral-xyz/anchor";
-import { createMint } from "@solana/spl-token";
-import { PublicKey } from "@solana/web3.js";
+import { createMint, TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { PublicKey, SystemProgram, SYSVAR_RENT_PUBKEY } from "@solana/web3.js";
 import { readFileSync } from "node:fs";
 
 async function main() {
   const provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
 
-  const idl = JSON.parse(readFileSync("target/idl/liquidity_vault.json", "utf8"));
+  const idl = JSON.parse(readFileSync("idl/liquidity_vault.json", "utf8"));
   const program = new anchor.Program(idl, provider);
   const admin = provider.wallet.publicKey;
   const tokenMint = process.argv[2]
@@ -29,9 +29,12 @@ async function main() {
 
   const initializeSignature = await program.methods.initializeVault().accounts({
     vaultState, tokenVault, shareMint, tokenMint, admin,
+    tokenProgram: TOKEN_PROGRAM_ID,
+    systemProgram: SystemProgram.programId,
+    rent: SYSVAR_RENT_PUBKEY,
   }).rpc();
   const vaultSignature = await program.methods.createUserCard().accounts({
-    vaultState, userCard, user: admin,
+    vaultState, userCard, user: admin, systemProgram: SystemProgram.programId,
   }).rpc();
 
   console.log(`Program: ${program.programId}`);
