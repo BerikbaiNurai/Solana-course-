@@ -16,6 +16,6 @@ I'm building a Liquidity Vault as I work through the course. I keep each week's 
 - **Week 9:** I added deposits. The program transfers SPL tokens into the vault and mints share tokens for the user. The branch README includes the setup and deposit details.
 - **Week 10:** I added withdrawals. The program burns the user's shares and transfers the proportional SPL token amount from the vault through a Token Program CPI signed by the vault PDA. The branch includes 12 integration scenarios tested on localnet.
 - **Week 11:** I created two SPL test tokens on devnet and initialized a Raydium CLMM pool at a 1:1 starting price. The branch README has the mint, pool, and transaction links.
-- **Week 12:** I added an exact-input swap from the vault through Raydium CLMM. The instruction burns the user's matching shares and enforces `min_amount_out`; the branch README has the build and devnet commands. The devnet swap still needs to be run.
+- **Week 12:** I added an exact-input swap from the vault through Raydium CLMM. The instruction burns the user's matching shares and enforces `min_amount_out`. I created a funded test pool, deposited W11A, and finalized a swap with a 1% slippage limit. The [Week 12 README](https://github.com/BerikbaiNurai/Solana-course-/blob/week-12/README.md) has the account and transaction links.
 
 Each branch has its own code and README. Open the README for a week to see how I built and checked that part of the project.
