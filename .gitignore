@@ -1,0 +1,17 @@
+target/
+node_modules/
+.cargo-home/
+.npm-cache/
+yarn-error.log
+.anchor/
+wallet.json
+id.json
+*.keypair.json
+target/deploy/*-keypair.json
+**/id.json
+.env
+.DS_Store
+.vscode/
+.idea/
+
+.week11-mints.json
