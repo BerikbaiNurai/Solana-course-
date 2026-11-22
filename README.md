@@ -38,11 +38,9 @@ corepack yarn test
 
 The integration suite has 12 scenarios covering initialization, user cards, deposits, successful and full withdrawals, invalid amounts, missing cards, and insufficient shares.
 
-## Try the full flow on devnet
+## Week 10 withdrawal on devnet
 
-The program is already deployed at the same program ID as Week 9. The configured wallet is the upgrade authority. Deploying the updated program and running the commands below sends devnet transactions and spends devnet SOL for fees and account rent. I did not submit those transactions automatically.
-
-Use a fresh test vault for this version. The Week 10 user card stores share accounting, while existing Week 9 cards have the older layout. Upgrading the program does not migrate existing account data. The setup script below creates a new test token mint and vault, so it does not touch the old Week 9 deposit.
+I tested the withdrawal with a fresh test mint and vault. I kept it separate from the Week 9 vault because the Week 10 user card also stores share accounting, and an upgrade does not migrate old account data. The course reuses this program ID in later weeks; the Devnet withdrawal below was executed by the deployed vault program.
 
 ```bash
 corepack yarn install
@@ -51,18 +49,39 @@ anchor upgrade target/deploy/liquidity_vault.so --program-id 7deCasDiUCe9D4T4QD8
 corepack yarn setup:devnet
 ```
 
-The setup command prints the new token mint address. Use that address in the next two commands. The demo flag mints test tokens only because the wallet created by setup is the test mint authority:
+To repeat the flow with a fresh vault, build the current branch, initialize a vault, deposit one demo token, and withdraw one share. The setup command creates a test mint for which the configured wallet is the mint authority:
 
 ```bash
 corepack yarn deposit:devnet <TOKEN_MINT_ADDRESS> 1 --mint-demo
 corepack yarn withdraw:devnet <TOKEN_MINT_ADDRESS> 1
 ```
 
-The withdrawal command burns 1 share token and returns the proportional accepted token amount. It prints the transaction link and the balances after the withdrawal. Use only the new test mint printed by setup, not the Week 9 mint below.
+I completed this flow on Devnet. The test mint has six decimals, so `1,000,000` base units equals one token. The deposit put one token in the vault and minted one share. The withdrawal burned that share and returned one token to my wallet.
+
+| Account or action | Devnet Explorer |
+|---|---|
+| Test token mint | [63NhV3KmbyaczGQ8sozk23mtKmoX7bub42AXLtgTUhps](https://explorer.solana.com/address/63NhV3KmbyaczGQ8sozk23mtKmoX7bub42AXLtgTUhps?cluster=devnet) |
+| Vault state PDA | [3owstGga2wZV6G2RNPiQUvbWKfVhiFTmYZVx7ziaAcrH](https://explorer.solana.com/address/3owstGga2wZV6G2RNPiQUvbWKfVhiFTmYZVx7ziaAcrH?cluster=devnet) |
+| Vault token account | [FCaGLEQmMDtyFdcwooNj1VNmW6XqTxyCUznD5noKEsV8](https://explorer.solana.com/address/FCaGLEQmMDtyFdcwooNj1VNmW6XqTxyCUznD5noKEsV8?cluster=devnet) |
+| Share mint | [pFWxUJBqX686V7btGNJDxydgm3cXuURr5Lk6eYZZE9M](https://explorer.solana.com/address/pFWxUJBqX686V7btGNJDxydgm3cXuURr5Lk6eYZZE9M?cluster=devnet) |
+| User card PDA | [FrnPuMhLuAkGoZCEYjMdnQVv1pX1yiqxLp4iGmkmDD2r](https://explorer.solana.com/address/FrnPuMhLuAkGoZCEYjMdnQVv1pX1yiqxLp4iGmkmDD2r?cluster=devnet) |
+| Vault initialization | [transaction](https://explorer.solana.com/tx/3uUo5oT4NjLtfEfYfrFPeDqx1mZdZZHTSxkK3RaTPNbYcBKSSi6iuupXKgHLMPrWHUuGJwzf1upezga3uxMdEcek?cluster=devnet) |
+| User card creation | [transaction](https://explorer.solana.com/tx/4E9qtwxHgS5aQVYchGUQgdRmLMuTKzZoEDKpJ675pNUYguDTyecofJFpkfAR3QAQL6sm5qeKr692peh7gKbcqkPH?cluster=devnet) |
+| Deposit of one token and minting one share | [transaction](https://explorer.solana.com/tx/Sma153ar2Tn7Nxhao3PZ7sPNh7jUrhDqSF4bXtRQ2G7GnEjyHpix6WyoP6eddTP5etz51xrcQmzLubaagbYjxdV?cluster=devnet) |
+| Withdrawal of one share | [transaction with Token Program CPI details](https://explorer.solana.com/tx/2gSKF13YLCNqQTX4SaaDu8Bk82jQFwxtBLgdLrsCkedMbtaoWs3SE2vnYmuarii7mtGdftMdAptmDmhvSk67HfZs?cluster=devnet) |
+
+In the withdrawal transaction, the Token Program first burns `1,000,000` share base units. It then transfers `1,000,000` token base units from the vault token account to my token account. The burn is authorized by my wallet; the transfer is authorized by the `VaultState` PDA through the vault program. Both inner instructions are visible in the Explorer transaction details and logs.
+
+| Balance | Before withdrawal | After withdrawal |
+|---|---:|---:|
+| My test tokens | 0 | 1,000,000 base units (1 token) |
+| My share tokens | 1,000,000 base units (1 share) | 0 |
+| Vault token account | 1,000,000 base units (1 token) | 0 |
+| Share mint supply | 1,000,000 base units | 0 |
 
 ## Week 9 devnet accounts
 
-These links are the previous week's setup and are included for reference. Week 10 localnet tests passed; I have not yet recorded a Week 10 devnet withdrawal transaction.
+These links are the previous week's setup and are included for reference. The withdrawal above uses a separate fresh vault, so it does not change the Week 9 deposit.
 
 | Account | Week 9 devnet explorer |
 |---|---|
