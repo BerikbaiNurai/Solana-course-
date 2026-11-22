@@ -57,7 +57,7 @@ That command needs the Anchor CLI and the local Solana validator installed. The 
 
 This is a course prototype. It is configured for the two public Devnet test mints above, not arbitrary tokens or mainnet funds. The Admin page only works with the wallet that is administrator of both vaults. Rebalancing a position after the pool price leaves its range is still available through the Week 13 CLI command. The vault program and PDAs are the source of truth for balances and share ownership.
 
-I checked the production build and all eight unit tests. I also opened the app in Chrome and checked that both the Vault and Admin pages render. I could not finish the wallet click-through because Phantom was not available in that Chrome profile. I still need to connect Phantom on Devnet and check the transactions in the wallet.
+I checked the production build and all eight unit tests. I also opened the app in Chrome, connected Phantom on Devnet, and loaded both vaults. The Phantom account I used had no W11A, W11B, or share tokens, and it was not the administrator of the vaults. I could not submit a deposit, withdrawal, or admin transaction from that account, so I still need to repeat those steps with a funded Devnet wallet and the vault administrator wallet.
 
 ## What I learned
 
