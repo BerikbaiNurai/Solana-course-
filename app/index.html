@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f5f4ef" />
+    <meta
+      name="description"
+      content="A simple Solana devnet interface for the AlmaU Liquidity Vault capstone."
+    />
+    <title>Northstar Vault · Solana</title>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="#top" aria-label="Northstar Vault home">
+          <span class="brand-mark">N</span>
+          <span>northstar<span class="brand-light">.vault</span></span>
+        </a>
+        <div class="topbar-right">
+          <span class="network-pill"
+            ><span class="status-dot"></span> Solana Devnet</span
+          >
+          <button id="wallet-button" class="wallet-button" type="button">
+            Connect wallet
+          </button>
+        </div>
+      </header>
+
+      <main id="top">
+        <section class="hero">
+          <div class="hero-copy">
+            <p class="eyebrow">ALMAU · CAPSTONE BUILD</p>
+            <h1>Make your tokens<br /><span>work together.</span></h1>
+            <p class="hero-text">
+              A simple way to deposit into my Solana vault, track your shares,
+              and see the liquidity position behind it.
+            </p>
+            <div class="hero-actions">
+              <button id="hero-connect" class="button-primary" type="button">
+                Connect wallet <span aria-hidden="true">↗</span>
+              </button>
+              <a
+                class="text-link"
+                href="https://explorer.solana.com/address/7deCasDiUCe9D4T4QD8RYMzxMameRDpeE1yZAv4J3o4S?cluster=devnet"
+                target="_blank"
+                rel="noreferrer"
+                >View program <span aria-hidden="true">↗</span></a
+              >
+            </div>
+          </div>
+          <div class="hero-art" aria-hidden="true">
+            <div class="orbit orbit-one"></div>
+            <div class="orbit orbit-two"></div>
+            <div class="orbit-core"><span>n</span></div>
+            <div class="orbit-token token-a">A</div>
+            <div class="orbit-token token-b">B</div>
+            <div class="orbit-caption">SOLANA<br />LIQUIDITY VAULT</div>
+          </div>
+        </section>
+
+        <section class="workspace" aria-label="Vault workspace">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">YOUR POSITION</p>
+              <h2>Vault overview</h2>
+            </div>
+            <button
+              id="refresh-button"
+              class="icon-button"
+              type="button"
+              aria-label="Refresh vault data"
+              title="Refresh"
+            >
+              ↻
+            </button>
+          </div>
+
+          <div
+            class="token-switch"
+            role="tablist"
+            aria-label="Choose vault token"
+          >
+            <button
+              class="token-tab active"
+              type="button"
+              role="tab"
+              aria-selected="true"
+              data-mint="7S6KLpGa4HjC4BtuQKsrmufKcUtky7WTn7jwDM1Pnj2E"
+            >
+              <span class="token-icon token-icon-a">A</span
+              ><span
+                ><strong>Token A</strong><small>W11A · 6 decimals</small></span
+              >
+            </button>
+            <button
+              class="token-tab"
+              type="button"
+              role="tab"
+              aria-selected="false"
+              data-mint="HxxdDXKJN3n3kWfutQ1PjTkHXFHtvHqNz9atwLEu3Kvh"
+            >
+              <span class="token-icon token-icon-b">B</span
+              ><span
+                ><strong>Token B</strong><small>W11B · 6 decimals</small></span
+              >
+            </button>
+          </div>
+
+          <div class="stats-grid">
+            <article class="stat-card">
+              <span class="stat-label">Vault balance</span
+              ><strong id="vault-balance" class="stat-value">—</strong
+              ><span id="vault-balance-caption" class="stat-caption"
+                >Connect wallet to load</span
+              >
+            </article>
+            <article class="stat-card">
+              <span class="stat-label">Total deposited</span
+              ><strong id="total-deposited" class="stat-value">—</strong
+              ><span class="stat-caption">Tracked by the vault program</span>
+            </article>
+            <article class="stat-card">
+              <span class="stat-label">Your shares</span
+              ><strong id="user-shares" class="stat-value">—</strong
+              ><span id="user-shares-caption" class="stat-caption"
+                >Receipt tokens in your wallet</span
+              >
+            </article>
+            <article class="stat-card stat-card-accent">
+              <span class="stat-label">Your deposit</span
+              ><strong id="user-deposit" class="stat-value">—</strong
+              ><span class="stat-caption">Recorded on your PDA card</span>
+            </article>
+          </div>
+
+          <div class="action-layout">
+            <section class="action-card">
+              <div class="action-tabs" role="tablist" aria-label="Vault action">
+                <button
+                  id="deposit-tab"
+                  class="action-tab active"
+                  type="button"
+                  role="tab"
+                  aria-selected="true"
+                >
+                  Deposit
+                </button>
+                <button
+                  id="withdraw-tab"
+                  class="action-tab"
+                  type="button"
+                  role="tab"
+                  aria-selected="false"
+                >
+                  Withdraw
+                </button>
+              </div>
+              <form id="vault-form">
+                <label id="amount-label" for="amount-input"
+                  >Amount to deposit</label
+                >
+                <div class="amount-field">
+                  <input
+                    id="amount-input"
+                    inputmode="decimal"
+                    autocomplete="off"
+                    placeholder="0.00"
+                  /><span id="amount-symbol">W11A</span>
+                </div>
+                <div class="balance-row">
+                  <span id="balance-label">Wallet balance</span
+                  ><span id="wallet-token-balance">Connect wallet</span>
+                </div>
+                <div id="withdraw-quote" class="quote-row hidden"></div>
+                <button
+                  id="submit-button"
+                  class="button-primary button-wide"
+                  type="submit"
+                  disabled
+                >
+                  Connect wallet first <span aria-hidden="true">→</span>
+                </button>
+              </form>
+              <p class="action-note">
+                Transactions are signed in your wallet and sent to Solana
+                Devnet. Devnet tokens have no real value.
+              </p>
+            </section>
+
+            <section class="position-card">
+              <div class="position-head">
+                <div>
+                  <p class="eyebrow">RAYDIUM CLMM</p>
+                  <h3>Liquidity position</h3>
+                </div>
+                <span id="position-status" class="position-status"
+                  >Connect wallet</span
+                >
+              </div>
+              <div class="position-range">
+                <div>
+                  <span class="muted-label">PRICE RANGE</span
+                  ><strong id="position-range">—</strong>
+                </div>
+                <div class="range-glyph" aria-hidden="true">
+                  <span></span><span></span><span></span><span></span
+                  ><span></span>
+                </div>
+              </div>
+              <div class="position-meta">
+                <span>Pool</span
+                ><a
+                  href="https://explorer.solana.com/address/3R29TR1M6hmJAPF3QfiKkErMowhEHHpvprRdKecLBSmt?cluster=devnet"
+                  target="_blank"
+                  rel="noreferrer"
+                  >W11A / W11B <span aria-hidden="true">↗</span></a
+                >
+              </div>
+              <div class="position-meta">
+                <span>Controller PDA</span
+                ><a
+                  id="controller-link"
+                  href="https://explorer.solana.com/address/Hqyd7ufiFVjUUUQBR1vSdAwvVV7KuDZwVqapzcxpe8rP?cluster=devnet"
+                  target="_blank"
+                  rel="noreferrer"
+                  >View account <span aria-hidden="true">↗</span></a
+                >
+              </div>
+              <div class="position-footer">
+                <span id="position-detail"
+                  >The vault program holds the position NFT.</span
+                ><a
+                  href="https://github.com/BerikbaiNurai/Solana-course-/tree/week-13"
+                  target="_blank"
+                  rel="noreferrer"
+                  >How it works <span aria-hidden="true">↗</span></a
+                >
+              </div>
+            </section>
+          </div>
+
+          <div id="notice" class="notice" role="status" aria-live="polite">
+            Connect a Phantom wallet set to Devnet to load your vault.
+          </div>
+          <div class="explorer-row">
+            <span>Program <code>7deCas…4J3o4S</code></span
+            ><a
+              href="https://explorer.solana.com/address/7deCasDiUCe9D4T4QD8RYMzxMameRDpeE1yZAv4J3o4S?cluster=devnet"
+              target="_blank"
+              rel="noreferrer"
+              >Open in Solana Explorer ↗</a
+            >
+          </div>
+        </section>
+      </main>
+
+      <footer>
+        <span>Northstar Vault · AlmaU Solana course</span
+        ><span>Built for Devnet · Week 14</span>
+      </footer>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

@@ -1,5 +1,5 @@
 {
-  "name": "liquidity-vault-week-13",
+  "name": "liquidity-vault-capstone-week-14",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -13,7 +13,10 @@
     "create:clmm-pool:devnet": "tsx scripts/create-clmm-pool.ts",
     "seed:clmm:devnet": "tsx scripts/seed-clmm-pool.ts",
     "swap:devnet": "tsx scripts/swap-from-vault.ts",
-    "clmm:position": "tsx scripts/manage-clmm-position.ts"
+    "clmm:position": "tsx scripts/manage-clmm-position.ts",
+    "web:dev": "vite --config app/vite.config.mts",
+    "web:build": "tsc --noEmit -p app/tsconfig.json && vite build --config app/vite.config.mts",
+    "web:test": "tsx --test app/src/lib/vault.test.ts"
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.31.1",
@@ -30,6 +33,7 @@
     "mocha": "^11.7.5",
     "ts-mocha": "^10.0.0",
     "tsx": "^4.19.2",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "vite": "^8.3.8"
   }
 }
