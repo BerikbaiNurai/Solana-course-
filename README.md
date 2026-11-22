@@ -61,7 +61,7 @@ MINT_0=7S6KLpGa4HjC4BtuQKsrmufKcUtky7WTn7jwDM1Pnj2E
 MINT_1=HxxdDXKJN3n3kWfutQ1PjTkHXFHtvHqNz9atwLEu3Kvh
 
 yarn clmm:position init "$POOL" "$MINT_0" "$MINT_1"
-yarn clmm:position open "$POOL" "$MINT_0" "$MINT_1" 0.8 1.25 1000000 1000000
+yarn clmm:position open "$POOL" "$MINT_0" "$MINT_1" 0.8 1.25 1500000 1800000
 ```
 
 I can collect fees and close the position with these commands:
@@ -76,16 +76,25 @@ The pool needs trades for fees to build up. If no swaps happen while the positio
 To check whether the price left my range and move the position if needed, I run:
 
 ```bash
-yarn clmm:position rebalance "$POOL" "$MINT_0" "$MINT_1" 5 1000000 1000000
+yarn clmm:position rebalance "$POOL" "$MINT_0" "$MINT_1" 5 500000 500000
 ```
 
 Here `5` sets the new range around the current tick. This script is a simple keeper that I run when I want to check the price; Solana programs do not wake up by themselves when the market moves.
 
 ## What I checked
 
-The Rust program passes `cargo check --features idl-build --locked` and the SBF build completes without stack-frame errors. The TypeScript files also pass `npx tsc --noEmit`.
+The Rust program passes `cargo check --features idl-build --locked`, the SBF build completes without stack-frame errors, and the TypeScript files pass `npx tsc --noEmit`. I also checked the instructions on Devnet. The controller PDA is `Hqyd7ufiFVjUUUQBR1vSdAwvVV7KuDZwVqapzcxpe8rP`, and the final position is open in ticks `-720..300`.
 
-I have not added Week 13 Devnet transaction links yet. I checked the program on Devnet and found that its upgrade authority is `A4LCC3q4PZt3orzGqowwMyJE23Xb5hxg1aizq3DRpucj`, while the wallet available to me is `DLgXdGoVya6j8iL4dnM75JxxbPA31XJLt28kJaUAMi4y`. I need the wallet that controls the upgrade authority to deploy these changes to the existing program. Until then, I cannot confirm the position, fee collection, close, or rebalance transactions on Explorer.
+Here are the transactions I used:
+
+- [Updated the vault program](https://explorer.solana.com/tx/95E8JMcFZfU85xawZHCWdrduQeBncZGyQekpfqNruSHCuJ1E93tnDgcwNzzscA6i4pPn9rK9feC2GbvLPeHMXMA?cluster=devnet)
+- [Created the Token B vault](https://explorer.solana.com/tx/66dmCDqZHgh6cxT3UXy4zK1UejHw2GAUNKAXFW2VGTJynJTGxnEe1XFf4M6k3ztM6FVHdSFUphhJpJesebJkNDDB?cluster=devnet) and [deposited tokens into both vaults](https://explorer.solana.com/tx/2DeL8J2trsZgD5TdfLceJDo3hhWBeCisQutN2dG5XD5mXajXfMuy9YTtbvSkgTdEuZcaMr7S5eSoFSbFV8YFcF3k?cluster=devnet), [Token B](https://explorer.solana.com/tx/4cXkBCNW9QUuoZpYGeyDPYhCvhGNiM4hfvqK92QSbx41JLw3TBwrSJt5VBCeUqGrtYsEw2wB8HEetgiZB33gCnbY?cluster=devnet)
+- [Created the position controller](https://explorer.solana.com/tx/4jWrfGeeVdLU8QysjnrrcKMgKzZrdU3NHsv2BY364xtyzXVB94kvDsajXfNGMdVBjjrgRrFrRCbSfGyJNTAU7yko?cluster=devnet) and [opened the first position](https://explorer.solana.com/tx/31EZqRyJmjTpnaVhBRCwXG45BfbJspo5Q7npNd4PvT64jK7EfwFXShXXpDS1sxQpFoW9tp1VYg7eqF8AoNNy5q4N?cluster=devnet)
+- [Swapped tokens through the vault](https://explorer.solana.com/tx/6JHudYCZkuuVLvEvhv5sHsuN6Sv9VrNa8bBaXYqZCXM2B7JpAZBbrRedW3C5NGiYscDsEtEbfV5fZQhs2xR8AGZ?cluster=devnet) and [collected 87 base units of Token A fees](https://explorer.solana.com/tx/5BGhbF5hyhgsw4uyToqrB5tKbsCDi4P3NamWVszLNJxsKRo515tWyzZtG3QG99HiLPwPP832yDWzcUpwCdcUiRrN?cluster=devnet)
+- [Closed a position](https://explorer.solana.com/tx/4tHCbErjWLch1Ypb6Cx16AsRqwTeNeSpBwZLVRWTg9asW7xPE3vhGn7hvVAgXXFq4mzDhEnhL2Yd3sKeinhCsHM4?cluster=devnet)
+- [Moved the price outside a narrow range](https://explorer.solana.com/tx/2C2ormdtiJbnHQyzz3kxQUKyey4YJPUk1raQKjCrpfpbUXb1Qj9pdBS54gD884h846r4sZyWHhFVaZ3jXrcP5uos?cluster=devnet), then the keeper [closed the old position](https://explorer.solana.com/tx/2hR88kWH9hcsdgBPKVC8KsZoDBaXN93kqmBW5yaVrBPmv9gtwR6nLcTBUiSW92tS9ChhgWSoXZMSiwitFMZLZuxH?cluster=devnet) and [opened a new range around the current tick](https://explorer.solana.com/tx/e7m7MBmrkCcT3uK3ts3geBZF9wogum3WQrjK645dTm4WRiWyASBNUS5vgreWWoBwuRtqGpBkCXcPdjSv3iJ1URU?cluster=devnet)
+
+The fee collection happened after a swap while the position was active. Only Token A had a small fee to collect; the amount was 87 base units, or `0.000087` tokens with six decimals. Devnet test tokens do not have real value.
 
 ## What I learned
 
