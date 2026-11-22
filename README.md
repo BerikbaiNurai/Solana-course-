@@ -7,8 +7,10 @@ For the capstone, I turned my Liquidity Vault into a small web app. I wanted a u
 - Phantom wallet connection for Solana Devnet.
 - Token A and Token B vault views with wallet balance, vault balance, total deposits, receipt shares, and the user's PDA card.
 - Deposit and withdraw forms. The app creates the user's token accounts and card when needed, then asks the wallet to sign the transaction.
-- A read-only Raydium CLMM panel that shows the position controller and its current tick range.
-- Unit tests for amount parsing, PDA derivation, and account-data decoding.
+- An admin page for exact-input swaps through the Raydium CLMM pool. It quotes the swap, applies a minimum-output slippage limit, and asks the wallet to approve it.
+- Admin controls to initialize the position controller, open a price range, collect fees, and close the position. The app checks that the connected wallet administers both vaults.
+- Explorer links after successful transactions, so I can check the on-chain result.
+- Eight unit tests for amount handling, PDA derivation, account decoding, and the client IDL instructions.
 
 The app uses the test mints and CLMM pool from the earlier weeks:
 
@@ -52,7 +54,9 @@ That command needs the Anchor CLI and the local Solana validator installed. The 
 
 ## Notes
 
-This is a course prototype. It is configured for the two public Devnet test mints above, not arbitrary tokens or mainnet funds. The position panel is read-only; position management remains in the Week 13 CLI. The vault program and PDAs are the source of truth for balances and share ownership.
+This is a course prototype. It is configured for the two public Devnet test mints above, not arbitrary tokens or mainnet funds. The Admin page only works with the wallet that is administrator of both vaults. Rebalancing a position after the pool price leaves its range is still available through the Week 13 CLI command. The vault program and PDAs are the source of truth for balances and share ownership.
+
+I checked the production build and unit tests. I still need to run the complete click-through with Phantom in a browser; that requires approving a Devnet transaction from the extension.
 
 ## What I learned
 

@@ -15,6 +15,7 @@ import {
   VersionedTransaction,
 } from "@solana/web3.js";
 import { Buffer } from "buffer";
+import { mountAdminView } from "./admin";
 import idl from "../../idl/liquidity_vault.json";
 import {
   POOL_ID,
@@ -82,6 +83,10 @@ const tokenTabs = [
 const actionTabs = [
   ...document.querySelectorAll<HTMLButtonElement>(".action-tab"),
 ];
+const vaultPage = document.querySelector<HTMLElement>("#top")!;
+const adminPage = document.querySelector<HTMLElement>("#admin-page")!;
+const vaultViewButton = document.querySelector<HTMLButtonElement>("#vault-view-button")!;
+const adminViewButton = document.querySelector<HTMLButtonElement>("#admin-view-button")!;
 
 let walletProvider: PhantomWalletProvider | null = null;
 let subscribedProvider: PhantomWalletProvider | null = null;
@@ -89,6 +94,7 @@ let walletPublicKey: PublicKey | null = null;
 let selectedTokenIndex = 0;
 let activeAction: "deposit" | "withdraw" = "deposit";
 let snapshot: VaultSnapshot | null = null;
+let adminView: ReturnType<typeof mountAdminView> | null = null;
 
 const selectedToken = () => VAULT_TOKENS[selectedTokenIndex];
 const truncate = (address: string) =>
@@ -100,6 +106,26 @@ function setNotice(
 ) {
   notice.textContent = message;
   notice.className = `notice${kind === "info" ? "" : ` ${kind}`}`;
+}
+
+function setTransactionNotice(message: string, signature: string) {
+  notice.textContent = `${message} `;
+  notice.className = "notice success";
+  const link = document.createElement("a");
+  link.href = `https://explorer.solana.com/tx/${signature}?cluster=devnet`;
+  link.target = "_blank";
+  link.rel = "noreferrer";
+  link.textContent = "View transaction ↗";
+  notice.append(link);
+}
+
+function selectPage(page: "vault" | "admin") {
+  const showAdmin = page === "admin";
+  vaultPage.hidden = showAdmin;
+  adminPage.hidden = !showAdmin;
+  vaultViewButton.classList.toggle("active", !showAdmin);
+  adminViewButton.classList.toggle("active", showAdmin);
+  if (showAdmin) void adminView?.refresh();
 }
 
 function currentProvider() {
@@ -336,6 +362,7 @@ async function refresh() {
   } finally {
     refreshButton.disabled = false;
     renderAction();
+    if (!adminPage.hidden) void adminView?.refresh();
   }
 }
 
@@ -466,9 +493,9 @@ async function submitVaultAction(event: SubmitEvent) {
     });
     amountInput.value = "";
     await refresh();
-    setNotice(
-      `${activeAction === "deposit" ? "Deposit" : "Withdrawal"} confirmed: ${truncate(signature)}`,
-      "success",
+    setTransactionNotice(
+      `${activeAction === "deposit" ? "Deposit" : "Withdrawal"} confirmed (${truncate(signature)}).`,
+      signature,
     );
   } catch (error) {
     const message =
@@ -501,6 +528,7 @@ async function connectWallet() {
         walletButton.textContent = truncate(walletPublicKey.toBase58());
         heroConnect.textContent = `Connected ${truncate(walletPublicKey.toBase58())}`;
         void refresh();
+        void adminView?.refresh();
       } else {
         void clearConnection();
       }
@@ -515,6 +543,7 @@ async function connectWallet() {
     heroConnect.disabled = true;
     setNotice("Wallet connected. Reading vault accounts from Devnet…");
     await refresh();
+    await adminView?.refresh();
   } catch (error) {
     setNotice(
       error instanceof Error
@@ -548,6 +577,7 @@ async function clearConnection() {
   setText("#user-shares-caption", "Receipt tokens in your wallet");
   setText("#position-status", "Connect wallet");
   setText("#position-range", "—");
+  void adminView?.refresh();
   renderAction();
   setNotice("Wallet disconnected.");
 }
@@ -556,6 +586,8 @@ walletButton.addEventListener("click", () =>
   walletPublicKey ? void disconnectWallet() : void connectWallet(),
 );
 heroConnect.addEventListener("click", () => void connectWallet());
+vaultViewButton.addEventListener("click", () => selectPage("vault"));
+adminViewButton.addEventListener("click", () => selectPage("admin"));
 refreshButton.addEventListener("click", () => void refresh());
 form.addEventListener("submit", (event) => void submitVaultAction(event));
 amountInput.addEventListener("input", updateWithdrawQuote);
@@ -582,4 +614,10 @@ actionTabs.forEach((tab, index) =>
     renderAction();
   }),
 );
+adminView = mountAdminView({
+  connection,
+  getProvider: anchorProvider,
+  getWallet: () => walletPublicKey,
+  showTransaction: setTransactionNotice,
+});
 renderAction();

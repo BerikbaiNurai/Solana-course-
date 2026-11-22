@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import idl from "../../../idl/liquidity_vault.json";
 import { PublicKey } from "@solana/web3.js";
 import {
   PROGRAM_ID,
@@ -83,4 +84,29 @@ test("reads the position ticks and open flag from the Anchor account layout", ()
     tickUpper: 300,
     isOpen: true,
   });
+});
+
+test("includes the Week 10 withdraw instruction in the client IDL", () => {
+  const instructions = (idl as { instructions: Array<{
+    name: string;
+    discriminator: number[];
+    accounts: Array<{ name: string; writable?: boolean; signer?: boolean }>;
+    args: Array<{ name: string; type: string }>;
+  }> }).instructions;
+  const withdraw = instructions.find((instruction) => instruction.name === "withdraw");
+  assert.ok(withdraw);
+  assert.deepEqual(withdraw.discriminator, [183, 18, 70, 156, 148, 109, 161, 34]);
+  assert.deepEqual(withdraw.accounts.map((account) => account.name), [
+    "vaultState",
+    "tokenMint",
+    "userCard",
+    "tokenVault",
+    "shareMint",
+    "userTokenAccount",
+    "userShareAccount",
+    "user",
+    "tokenProgram",
+  ]);
+  assert.equal(withdraw.args[0]?.name, "shares");
+  assert.equal(withdraw.args[0]?.type, "u64");
 });

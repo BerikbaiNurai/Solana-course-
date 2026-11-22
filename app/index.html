@@ -21,6 +21,10 @@
           <span class="network-pill"
             ><span class="status-dot"></span> Solana Devnet</span
           >
+          <nav class="view-switch" aria-label="App section">
+            <button id="vault-view-button" class="view-button active" type="button">Vault</button>
+            <button id="admin-view-button" class="view-button" type="button">Admin</button>
+          </nav>
           <button id="wallet-button" class="wallet-button" type="button">
             Connect wallet
           </button>
@@ -252,6 +256,82 @@
               >Open in Solana Explorer ↗</a
             >
           </div>
+        </section>
+      </main>
+
+      <main id="admin-page" hidden>
+        <section class="hero admin-hero">
+          <div class="hero-copy">
+            <p class="eyebrow">VAULT ADMINISTRATION</p>
+            <h1>Manage the<br /><span>liquidity position.</span></h1>
+            <p class="hero-text">
+              Swap through the course CLMM pool, open a price range, collect fees,
+              or close the position. Each action is signed by the connected vault
+              administrator and sent to Devnet.
+            </p>
+          </div>
+          <div class="admin-badge" aria-hidden="true">
+            <span>ADMIN</span><strong>CLMM</strong><small>DEVNET ONLY</small>
+          </div>
+        </section>
+
+        <section class="workspace" aria-label="Vault administration workspace">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">ADMIN WORKSPACE</p>
+              <h2>Pool operations</h2>
+            </div>
+            <button id="admin-refresh" class="icon-button" type="button" aria-label="Refresh admin data" title="Refresh">↻</button>
+          </div>
+
+          <div class="stats-grid admin-stats">
+            <article class="stat-card"><span class="stat-label">Connected admin</span><strong id="admin-wallet" class="stat-value admin-address">Connect wallet</strong><span class="stat-caption">Must administer both vaults</span></article>
+            <article class="stat-card"><span class="stat-label">Raydium pool tick</span><strong id="admin-pool-tick" class="stat-value">—</strong><span class="stat-caption">Current pool state on Devnet</span></article>
+            <article class="stat-card stat-card-accent"><span class="stat-label">Position controller</span><strong id="admin-position-state" class="stat-value">—</strong><span class="stat-caption">Position state stored by the vault PDA</span></article>
+          </div>
+
+          <div class="admin-grid">
+            <form id="swap-form" class="action-card admin-card">
+              <div class="position-head">
+                <div><p class="eyebrow">RAYDIUM CLMM</p><h3>Swap from vault</h3></div>
+                <span class="position-status">Admin only</span>
+              </div>
+              <label for="swap-direction">Token direction</label>
+              <select id="swap-direction" class="admin-input">
+                <option value="a-to-b">W11A → W11B</option>
+                <option value="b-to-a">W11B → W11A</option>
+              </select>
+              <label for="swap-amount">Exact input amount</label>
+              <div class="amount-field"><input id="swap-amount" inputmode="decimal" autocomplete="off" value="0.1" /><span>token</span></div>
+              <label for="swap-slippage">Maximum slippage</label>
+              <div class="amount-field"><input id="swap-slippage" inputmode="numeric" value="100" /><span>bps</span></div>
+              <p class="action-note">The app quotes the pool and sends the minimum output to the on-chain instruction. A stale quote can fail safely.</p>
+              <button id="swap-submit" class="button-primary button-wide" type="submit" disabled>Quote and swap →</button>
+            </form>
+
+            <section class="action-card admin-card" aria-labelledby="position-admin-title">
+              <div class="position-head">
+                <div><p class="eyebrow">POSITION NFT STAYS IN THE VAULT</p><h3 id="position-admin-title">CLMM position</h3></div>
+                <span class="position-status">Admin only</span>
+              </div>
+              <button id="position-init" class="button-secondary button-wide" type="button" disabled>Initialize position controller</button>
+              <div class="admin-range-grid">
+                <label>Lower price <span>W11B / W11A</span><input id="range-lower" class="admin-input" inputmode="decimal" value="0.8" /></label>
+                <label>Upper price <span>W11B / W11A</span><input id="range-upper" class="admin-input" inputmode="decimal" value="1.25" /></label>
+                <label>Maximum W11A<input id="range-max-a" class="admin-input" inputmode="decimal" value="1.5" /></label>
+                <label>Maximum W11B<input id="range-max-b" class="admin-input" inputmode="decimal" value="1.8" /></label>
+              </div>
+              <button id="position-open" class="button-primary button-wide admin-action" type="button" disabled>Open position →</button>
+              <div class="admin-action-row">
+                <button id="position-collect" class="button-secondary" type="button" disabled>Collect fees</button>
+                <button id="position-close" class="button-secondary danger-button" type="button" disabled>Close position</button>
+              </div>
+              <p class="action-note">Opening uses the selected range and token limits. Closing returns the position's liquidity and outstanding fees to the two vault token accounts.</p>
+            </section>
+          </div>
+
+          <div id="admin-status" class="notice" role="status" aria-live="polite">Connect the Devnet administrator wallet to load pool data.</div>
+          <div class="explorer-row"><span>Raydium pool <code>3R29…LBSmt</code></span><a href="https://explorer.solana.com/address/3R29TR1M6hmJAPF3QfiKkErMowhEHHpvprRdKecLBSmt?cluster=devnet" target="_blank" rel="noreferrer">Open in Solana Explorer ↗</a></div>
         </section>
       </main>
 

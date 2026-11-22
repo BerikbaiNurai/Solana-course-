@@ -139,6 +139,61 @@
       ]
     },
     {
+      "name": "withdraw",
+      "discriminator": [
+        183,
+        18,
+        70,
+        156,
+        148,
+        109,
+        161,
+        34
+      ],
+      "accounts": [
+        {
+          "name": "vaultState",
+          "writable": true
+        },
+        {
+          "name": "tokenMint"
+        },
+        {
+          "name": "userCard",
+          "writable": true
+        },
+        {
+          "name": "tokenVault",
+          "writable": true
+        },
+        {
+          "name": "shareMint",
+          "writable": true
+        },
+        {
+          "name": "userTokenAccount",
+          "writable": true
+        },
+        {
+          "name": "userShareAccount",
+          "writable": true
+        },
+        {
+          "name": "user",
+          "signer": true
+        },
+        {
+          "name": "tokenProgram"
+        }
+      ],
+      "args": [
+        {
+          "name": "shares",
+          "type": "u64"
+        }
+      ]
+    },
+    {
       "name": "swapFromVault",
       "discriminator": [
         11,
