@@ -1,17 +1,19 @@
 {
-  "name": "liquidity-vault-week-12",
+  "name": "liquidity-vault-week-13",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "build": "anchor build",
-    "deploy:devnet": "anchor upgrade target/deploy/liquidity_vault.so --program-id 7deCasDiUCe9D4T4QD8RYMzxMameRDpeE1yZAv4J3o4S --provider.cluster devnet",
+    "build:sbf": "cargo build-sbf --manifest-path Cargo.toml",
+    "deploy:devnet": "solana program deploy target/deploy/liquidity_vault.so --program-id 7deCasDiUCe9D4T4QD8RYMzxMameRDpeE1yZAv4J3o4S --url devnet",
     "setup:devnet": "tsx scripts/setup-vault.ts",
     "deposit:devnet": "tsx scripts/deposit-vault.ts",
     "test": "anchor test --provider.cluster localnet",
     "create:test-tokens:devnet": "tsx scripts/create-test-tokens.ts",
     "create:clmm-pool:devnet": "tsx scripts/create-clmm-pool.ts",
     "seed:clmm:devnet": "tsx scripts/seed-clmm-pool.ts",
-    "swap:devnet": "tsx scripts/swap-from-vault.ts"
+    "swap:devnet": "tsx scripts/swap-from-vault.ts",
+    "clmm:position": "tsx scripts/manage-clmm-position.ts"
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.31.1",

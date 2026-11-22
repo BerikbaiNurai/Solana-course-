@@ -4,80 +4,768 @@
     "name": "liquidity_vault",
     "version": "0.1.0",
     "spec": "0.1.0",
-    "description": "Week 12 client instructions for the liquidity vault"
+    "description": "Week 13 client instructions for vault-managed Raydium CLMM positions"
   },
   "instructions": [
     {
       "name": "initializeVault",
-      "discriminator": [48, 191, 163, 44, 71, 129, 63, 164],
+      "discriminator": [
+        48,
+        191,
+        163,
+        44,
+        71,
+        129,
+        63,
+        164
+      ],
       "accounts": [
-        { "name": "vaultState", "writable": true },
-        { "name": "tokenVault", "writable": true },
-        { "name": "shareMint", "writable": true },
-        { "name": "tokenMint" },
-        { "name": "admin", "writable": true, "signer": true },
-        { "name": "tokenProgram" },
-        { "name": "systemProgram" },
-        { "name": "rent" }
+        {
+          "name": "vaultState",
+          "writable": true
+        },
+        {
+          "name": "tokenVault",
+          "writable": true
+        },
+        {
+          "name": "shareMint",
+          "writable": true
+        },
+        {
+          "name": "tokenMint"
+        },
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "tokenProgram"
+        },
+        {
+          "name": "systemProgram"
+        },
+        {
+          "name": "rent"
+        }
       ],
       "args": []
     },
     {
       "name": "createUserCard",
-      "discriminator": [25, 67, 231, 22, 28, 170, 76, 39],
+      "discriminator": [
+        25,
+        67,
+        231,
+        22,
+        28,
+        170,
+        76,
+        39
+      ],
       "accounts": [
-        { "name": "vaultState" },
-        { "name": "userCard", "writable": true },
-        { "name": "user", "writable": true, "signer": true },
-        { "name": "systemProgram" }
+        {
+          "name": "vaultState"
+        },
+        {
+          "name": "userCard",
+          "writable": true
+        },
+        {
+          "name": "user",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "systemProgram"
+        }
       ],
       "args": []
     },
     {
       "name": "deposit",
-      "discriminator": [242, 35, 198, 137, 82, 225, 242, 182],
-      "accounts": [
-        { "name": "vaultState", "writable": true },
-        { "name": "tokenMint" },
-        { "name": "userCard", "writable": true },
-        { "name": "tokenVault", "writable": true },
-        { "name": "shareMint", "writable": true },
-        { "name": "userTokenAccount", "writable": true },
-        { "name": "userShareAccount", "writable": true },
-        { "name": "user", "signer": true },
-        { "name": "tokenProgram" }
+      "discriminator": [
+        242,
+        35,
+        198,
+        137,
+        82,
+        225,
+        242,
+        182
       ],
-      "args": [{ "name": "amount", "type": "u64" }]
+      "accounts": [
+        {
+          "name": "vaultState",
+          "writable": true
+        },
+        {
+          "name": "tokenMint"
+        },
+        {
+          "name": "userCard",
+          "writable": true
+        },
+        {
+          "name": "tokenVault",
+          "writable": true
+        },
+        {
+          "name": "shareMint",
+          "writable": true
+        },
+        {
+          "name": "userTokenAccount",
+          "writable": true
+        },
+        {
+          "name": "userShareAccount",
+          "writable": true
+        },
+        {
+          "name": "user",
+          "signer": true
+        },
+        {
+          "name": "tokenProgram"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
     },
     {
       "name": "swapFromVault",
-      "discriminator": [11, 213, 238, 33, 15, 61, 160, 17],
+      "discriminator": [
+        11,
+        213,
+        238,
+        33,
+        15,
+        61,
+        160,
+        17
+      ],
       "accounts": [
-        { "name": "vaultState", "writable": true },
-        { "name": "inputMint" },
-        { "name": "tokenVault", "writable": true },
-        { "name": "shareMint", "writable": true },
-        { "name": "userShareAccount", "writable": true },
-        { "name": "userOutputTokenAccount", "writable": true },
-        { "name": "outputMint" },
-        { "name": "userCard", "writable": true },
-        { "name": "user", "signer": true },
-        { "name": "ammConfig" },
-        { "name": "poolState", "writable": true },
-        { "name": "poolTokenVault0", "writable": true },
-        { "name": "poolTokenVault1", "writable": true },
-        { "name": "poolMint0" },
-        { "name": "poolMint1" },
-        { "name": "observationState", "writable": true },
-        { "name": "clmmProgram" },
-        { "name": "tokenProgram" },
-        { "name": "tokenProgram2022" },
-        { "name": "memoProgram" }
+        {
+          "name": "vaultState",
+          "writable": true
+        },
+        {
+          "name": "inputMint"
+        },
+        {
+          "name": "tokenVault",
+          "writable": true
+        },
+        {
+          "name": "shareMint",
+          "writable": true
+        },
+        {
+          "name": "userShareAccount",
+          "writable": true
+        },
+        {
+          "name": "userOutputTokenAccount",
+          "writable": true
+        },
+        {
+          "name": "outputMint"
+        },
+        {
+          "name": "userCard",
+          "writable": true
+        },
+        {
+          "name": "user",
+          "signer": true
+        },
+        {
+          "name": "ammConfig"
+        },
+        {
+          "name": "poolState",
+          "writable": true
+        },
+        {
+          "name": "poolTokenVault0",
+          "writable": true
+        },
+        {
+          "name": "poolTokenVault1",
+          "writable": true
+        },
+        {
+          "name": "poolMint0"
+        },
+        {
+          "name": "poolMint1"
+        },
+        {
+          "name": "observationState",
+          "writable": true
+        },
+        {
+          "name": "clmmProgram"
+        },
+        {
+          "name": "tokenProgram"
+        },
+        {
+          "name": "tokenProgram2022"
+        },
+        {
+          "name": "memoProgram"
+        }
       ],
       "args": [
-        { "name": "amountIn", "type": "u64" },
-        { "name": "minAmountOut", "type": "u64" }
+        {
+          "name": "amountIn",
+          "type": "u64"
+        },
+        {
+          "name": "minAmountOut",
+          "type": "u64"
+        }
       ]
+    },
+    {
+      "name": "initializePositionController",
+      "discriminator": [
+        73,
+        173,
+        177,
+        113,
+        72,
+        129,
+        57,
+        240
+      ],
+      "accounts": [
+        {
+          "name": "vaultState0",
+          "writable": false,
+          "signer": false
+        },
+        {
+          "name": "vaultState1",
+          "writable": false,
+          "signer": false
+        },
+        {
+          "name": "poolState",
+          "writable": false,
+          "signer": false
+        },
+        {
+          "name": "positionState",
+          "writable": true,
+          "signer": false
+        },
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "systemProgram",
+          "writable": false,
+          "signer": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "openClmmPosition",
+      "discriminator": [
+        34,
+        191,
+        86,
+        199,
+        219,
+        172,
+        27,
+        54
+      ],
+      "accounts": [
+        {
+          "name": "vaultState0",
+          "writable": true,
+          "signer": false
+        },
+        {
+          "name": "vaultState1",
+          "writable": true,
+          "signer": false
+        },
+        {
+          "name": "tokenVault0",
+          "writable": true,
+          "signer": false
+        },
+        {
+          "name": "tokenVault1",
+          "writable": true,
+          "signer": false
+        },
+        {
+          "name": "positionState",
+          "writable": true,
+          "signer": false
+        },
+        {
+          "name": "positionNftMint",
+          "writable": true,
+          "signer": false
+        },
+        {
+          "name": "positionNftAccount",
+          "writable": true,
+          "signer": false
+        },
+        {
+          "name": "metadataAccount",
+          "writable": true,
+          "signer": false
+        },
+        {
+          "name": "poolState",
+          "writable": true,
+          "signer": false
+        },
+        {
+          "name": "protocolPosition",
+          "writable": false,
+          "signer": false
+        },
+        {
+          "name": "tickArrayLower",
+          "writable": true,
+          "signer": false
+        },
+        {
+          "name": "tickArrayUpper",
+          "writable": true,
+          "signer": false
+        },
+        {
+          "name": "personalPosition",
+          "writable": true,
+          "signer": false
+        },
+        {
+          "name": "raydiumPoolVault0",
+          "writable": true,
+          "signer": false
+        },
+        {
+          "name": "raydiumPoolVault1",
+          "writable": true,
+          "signer": false
+        },
+        {
+          "name": "vaultMint0",
+          "writable": false,
+          "signer": false
+        },
+        {
+          "name": "vaultMint1",
+          "writable": false,
+          "signer": false
+        },
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "rent",
+          "writable": false,
+          "signer": false
+        },
+        {
+          "name": "systemProgram",
+          "writable": false,
+          "signer": false
+        },
+        {
+          "name": "tokenProgram",
+          "writable": false,
+          "signer": false
+        },
+        {
+          "name": "associatedTokenProgram",
+          "writable": false,
+          "signer": false
+        },
+        {
+          "name": "metadataProgram",
+          "writable": false,
+          "signer": false
+        },
+        {
+          "name": "tokenProgram2022",
+          "writable": false,
+          "signer": false
+        },
+        {
+          "name": "clmmProgram",
+          "writable": false,
+          "signer": false
+        }
+      ],
+      "args": [
+        {
+          "name": "tickLower",
+          "type": "i32"
+        },
+        {
+          "name": "tickUpper",
+          "type": "i32"
+        },
+        {
+          "name": "tickArrayLowerStart",
+          "type": "i32"
+        },
+        {
+          "name": "tickArrayUpperStart",
+          "type": "i32"
+        },
+        {
+          "name": "amount0Max",
+          "type": "u64"
+        },
+        {
+          "name": "amount1Max",
+          "type": "u64"
+        },
+        {
+          "name": "baseFlag",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "collectClmmFees",
+      "discriminator": [
+        51,
+        189,
+        105,
+        254,
+        124,
+        48,
+        189,
+        128
+      ],
+      "accounts": [
+        {
+          "name": "vaultState0",
+          "writable": false,
+          "signer": false
+        },
+        {
+          "name": "vaultState1",
+          "writable": false,
+          "signer": false
+        },
+        {
+          "name": "tokenVault0",
+          "writable": true,
+          "signer": false
+        },
+        {
+          "name": "tokenVault1",
+          "writable": true,
+          "signer": false
+        },
+        {
+          "name": "positionState",
+          "writable": true,
+          "signer": false
+        },
+        {
+          "name": "positionNftMint",
+          "writable": true,
+          "signer": false
+        },
+        {
+          "name": "positionNftAccount",
+          "writable": true,
+          "signer": false
+        },
+        {
+          "name": "personalPosition",
+          "writable": true,
+          "signer": false
+        },
+        {
+          "name": "poolState",
+          "writable": true,
+          "signer": false
+        },
+        {
+          "name": "protocolPosition",
+          "writable": false,
+          "signer": false
+        },
+        {
+          "name": "raydiumPoolVault0",
+          "writable": true,
+          "signer": false
+        },
+        {
+          "name": "raydiumPoolVault1",
+          "writable": true,
+          "signer": false
+        },
+        {
+          "name": "tickArrayLower",
+          "writable": true,
+          "signer": false
+        },
+        {
+          "name": "tickArrayUpper",
+          "writable": true,
+          "signer": false
+        },
+        {
+          "name": "vaultMint0",
+          "writable": false,
+          "signer": false
+        },
+        {
+          "name": "vaultMint1",
+          "writable": false,
+          "signer": false
+        },
+        {
+          "name": "admin",
+          "writable": false,
+          "signer": true
+        },
+        {
+          "name": "systemProgram",
+          "writable": false,
+          "signer": false
+        },
+        {
+          "name": "tokenProgram",
+          "writable": false,
+          "signer": false
+        },
+        {
+          "name": "tokenProgram2022",
+          "writable": false,
+          "signer": false
+        },
+        {
+          "name": "memoProgram",
+          "writable": false,
+          "signer": false
+        },
+        {
+          "name": "clmmProgram",
+          "writable": false,
+          "signer": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "closeClmmPosition",
+      "discriminator": [
+        201,
+        245,
+        26,
+        231,
+        49,
+        156,
+        188,
+        79
+      ],
+      "accounts": [
+        {
+          "name": "vaultState0",
+          "writable": false,
+          "signer": false
+        },
+        {
+          "name": "vaultState1",
+          "writable": false,
+          "signer": false
+        },
+        {
+          "name": "tokenVault0",
+          "writable": true,
+          "signer": false
+        },
+        {
+          "name": "tokenVault1",
+          "writable": true,
+          "signer": false
+        },
+        {
+          "name": "positionState",
+          "writable": true,
+          "signer": false
+        },
+        {
+          "name": "positionNftMint",
+          "writable": true,
+          "signer": false
+        },
+        {
+          "name": "positionNftAccount",
+          "writable": true,
+          "signer": false
+        },
+        {
+          "name": "personalPosition",
+          "writable": true,
+          "signer": false
+        },
+        {
+          "name": "poolState",
+          "writable": true,
+          "signer": false
+        },
+        {
+          "name": "protocolPosition",
+          "writable": false,
+          "signer": false
+        },
+        {
+          "name": "raydiumPoolVault0",
+          "writable": true,
+          "signer": false
+        },
+        {
+          "name": "raydiumPoolVault1",
+          "writable": true,
+          "signer": false
+        },
+        {
+          "name": "tickArrayLower",
+          "writable": true,
+          "signer": false
+        },
+        {
+          "name": "tickArrayUpper",
+          "writable": true,
+          "signer": false
+        },
+        {
+          "name": "vaultMint0",
+          "writable": false,
+          "signer": false
+        },
+        {
+          "name": "vaultMint1",
+          "writable": false,
+          "signer": false
+        },
+        {
+          "name": "admin",
+          "writable": false,
+          "signer": true
+        },
+        {
+          "name": "systemProgram",
+          "writable": false,
+          "signer": false
+        },
+        {
+          "name": "tokenProgram",
+          "writable": false,
+          "signer": false
+        },
+        {
+          "name": "tokenProgram2022",
+          "writable": false,
+          "signer": false
+        },
+        {
+          "name": "memoProgram",
+          "writable": false,
+          "signer": false
+        },
+        {
+          "name": "clmmProgram",
+          "writable": false,
+          "signer": false
+        }
+      ],
+      "args": []
+    }
+  ],
+  "accounts": [
+    {
+      "name": "positionState",
+      "discriminator": [
+        154,
+        47,
+        151,
+        70,
+        8,
+        128,
+        206,
+        231
+      ]
+    }
+  ],
+  "types": [
+    {
+      "name": "PositionState",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "vaultState0",
+            "type": "pubkey"
+          },
+          {
+            "name": "vaultState1",
+            "type": "pubkey"
+          },
+          {
+            "name": "pool",
+            "type": "pubkey"
+          },
+          {
+            "name": "positionNftMint",
+            "type": "pubkey"
+          },
+          {
+            "name": "personalPosition",
+            "type": "pubkey"
+          },
+          {
+            "name": "tickLower",
+            "type": "i32"
+          },
+          {
+            "name": "tickUpper",
+            "type": "i32"
+          },
+          {
+            "name": "generation",
+            "type": "u64"
+          },
+          {
+            "name": "isOpen",
+            "type": "bool"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
     }
   ]
 }
