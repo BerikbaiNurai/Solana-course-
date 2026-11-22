@@ -488,31 +488,31 @@ pub struct Withdraw<'info> {
 #[derive(Accounts)]
 pub struct SwapFromVault<'info> {
     #[account(mut, seeds = [b"vault", vault_state.token_mint.as_ref()], bump = vault_state.bump)]
-    pub vault_state: Account<'info, VaultState>,
+    pub vault_state: Box<Account<'info, VaultState>>,
     #[account(address = vault_state.token_mint)]
-    pub input_mint: Account<'info, Mint>,
+    pub input_mint: Box<Account<'info, Mint>>,
     #[account(mut, address = vault_state.token_vault, token::mint = input_mint, token::authority = vault_state)]
-    pub token_vault: Account<'info, TokenAccount>,
+    pub token_vault: Box<Account<'info, TokenAccount>>,
     #[account(mut, address = vault_state.share_mint, mint::authority = vault_state)]
-    pub share_mint: Account<'info, Mint>,
+    pub share_mint: Box<Account<'info, Mint>>,
     #[account(mut, token::mint = share_mint, token::authority = user)]
-    pub user_share_account: Account<'info, TokenAccount>,
+    pub user_share_account: Box<Account<'info, TokenAccount>>,
     #[account(mut, token::mint = output_mint, token::authority = user)]
-    pub user_output_token_account: Account<'info, TokenAccount>,
-    pub output_mint: Account<'info, Mint>,
+    pub user_output_token_account: Box<Account<'info, TokenAccount>>,
+    pub output_mint: Box<Account<'info, Mint>>,
     #[account(mut, seeds = [b"user_card", vault_state.key().as_ref(), user.key().as_ref()], bump = user_card.bump, constraint = user_card.vault == vault_state.key() @ VaultError::InvalidUserCard, constraint = user_card.owner == user.key() @ VaultError::InvalidUserCard)]
-    pub user_card: Account<'info, UserCard>,
+    pub user_card: Box<Account<'info, UserCard>>,
     pub user: Signer<'info>,
     #[account(address = pool_state.load()?.amm_config)]
     pub amm_config: Box<Account<'info, AmmConfig>>,
     #[account(mut)]
     pub pool_state: AccountLoader<'info, PoolState>,
     #[account(mut)]
-    pub pool_token_vault_0: InterfaceAccount<'info, InterfaceTokenAccount>,
+    pub pool_token_vault_0: Box<InterfaceAccount<'info, InterfaceTokenAccount>>,
     #[account(mut)]
-    pub pool_token_vault_1: InterfaceAccount<'info, InterfaceTokenAccount>,
-    pub pool_mint_0: InterfaceAccount<'info, InterfaceMint>,
-    pub pool_mint_1: InterfaceAccount<'info, InterfaceMint>,
+    pub pool_token_vault_1: Box<InterfaceAccount<'info, InterfaceTokenAccount>>,
+    pub pool_mint_0: Box<InterfaceAccount<'info, InterfaceMint>>,
+    pub pool_mint_1: Box<InterfaceAccount<'info, InterfaceMint>>,
     #[account(mut, address = pool_state.load()?.observation_key)]
     pub observation_state: AccountLoader<'info, ObservationState>,
     pub clmm_program: Program<'info, RaydiumClmm>,
@@ -540,15 +540,15 @@ pub struct InitializePositionController<'info> {
 #[derive(Accounts)]
 pub struct OpenClmmPosition<'info> {
     #[account(mut, seeds = [b"vault", vault_state_0.token_mint.as_ref()], bump = vault_state_0.bump)]
-    pub vault_state_0: Account<'info, VaultState>,
+    pub vault_state_0: Box<Account<'info, VaultState>>,
     #[account(mut, seeds = [b"vault", vault_state_1.token_mint.as_ref()], bump = vault_state_1.bump)]
-    pub vault_state_1: Account<'info, VaultState>,
+    pub vault_state_1: Box<Account<'info, VaultState>>,
     #[account(mut, address = vault_state_0.token_vault, token::mint = vault_state_0.token_mint, token::authority = vault_state_0)]
-    pub token_vault_0: Account<'info, TokenAccount>,
+    pub token_vault_0: Box<Account<'info, TokenAccount>>,
     #[account(mut, address = vault_state_1.token_vault, token::mint = vault_state_1.token_mint, token::authority = vault_state_1)]
-    pub token_vault_1: Account<'info, TokenAccount>,
+    pub token_vault_1: Box<Account<'info, TokenAccount>>,
     #[account(mut, seeds = [b"clmm_position", vault_state_0.key().as_ref(), vault_state_1.key().as_ref(), pool_state.key().as_ref()], bump = position_state.bump)]
-    pub position_state: Account<'info, PositionState>,
+    pub position_state: Box<Account<'info, PositionState>>,
     #[account(mut, seeds = [b"position_nft", position_state.key().as_ref(), &position_state.generation.to_le_bytes()], bump)]
     /// CHECK: Raydium initializes this deterministic NFT mint through CPI.
     pub position_nft_mint: UncheckedAccount<'info>,
@@ -572,13 +572,13 @@ pub struct OpenClmmPosition<'info> {
     #[account(mut)]
     pub personal_position: UncheckedAccount<'info>,
     #[account(mut)]
-    pub raydium_pool_vault_0: InterfaceAccount<'info, InterfaceTokenAccount>,
+    pub raydium_pool_vault_0: Box<InterfaceAccount<'info, InterfaceTokenAccount>>,
     #[account(mut)]
-    pub raydium_pool_vault_1: InterfaceAccount<'info, InterfaceTokenAccount>,
+    pub raydium_pool_vault_1: Box<InterfaceAccount<'info, InterfaceTokenAccount>>,
     #[account(address = vault_state_0.token_mint)]
-    pub vault_mint_0: InterfaceAccount<'info, InterfaceMint>,
+    pub vault_mint_0: Box<InterfaceAccount<'info, InterfaceMint>>,
     #[account(address = vault_state_1.token_mint)]
-    pub vault_mint_1: InterfaceAccount<'info, InterfaceMint>,
+    pub vault_mint_1: Box<InterfaceAccount<'info, InterfaceMint>>,
     #[account(mut)]
     pub admin: Signer<'info>,
     pub rent: Sysvar<'info, Rent>,
@@ -593,37 +593,37 @@ pub struct OpenClmmPosition<'info> {
 #[derive(Accounts)]
 pub struct ManageClmmPosition<'info> {
     #[account(seeds = [b"vault", vault_state_0.token_mint.as_ref()], bump = vault_state_0.bump)]
-    pub vault_state_0: Account<'info, VaultState>,
+    pub vault_state_0: Box<Account<'info, VaultState>>,
     #[account(seeds = [b"vault", vault_state_1.token_mint.as_ref()], bump = vault_state_1.bump)]
-    pub vault_state_1: Account<'info, VaultState>,
+    pub vault_state_1: Box<Account<'info, VaultState>>,
     #[account(mut, address = vault_state_0.token_vault, token::mint = vault_state_0.token_mint, token::authority = vault_state_0)]
-    pub token_vault_0: Account<'info, TokenAccount>,
+    pub token_vault_0: Box<Account<'info, TokenAccount>>,
     #[account(mut, address = vault_state_1.token_vault, token::mint = vault_state_1.token_mint, token::authority = vault_state_1)]
-    pub token_vault_1: Account<'info, TokenAccount>,
+    pub token_vault_1: Box<Account<'info, TokenAccount>>,
     #[account(mut, seeds = [b"clmm_position", vault_state_0.key().as_ref(), vault_state_1.key().as_ref(), pool_state.key().as_ref()], bump = position_state.bump)]
-    pub position_state: Account<'info, PositionState>,
+    pub position_state: Box<Account<'info, PositionState>>,
     #[account(mut, address = position_state.position_nft_mint)]
-    pub position_nft_mint: InterfaceAccount<'info, InterfaceMint>,
+    pub position_nft_mint: Box<InterfaceAccount<'info, InterfaceMint>>,
     #[account(mut, token::mint = position_nft_mint, token::authority = position_state)]
-    pub position_nft_account: InterfaceAccount<'info, InterfaceTokenAccount>,
+    pub position_nft_account: Box<InterfaceAccount<'info, InterfaceTokenAccount>>,
     #[account(mut, address = position_state.personal_position)]
-    pub personal_position: Account<'info, PersonalPositionState>,
+    pub personal_position: Box<Account<'info, PersonalPositionState>>,
     #[account(mut, address = position_state.pool)]
     pub pool_state: AccountLoader<'info, PoolState>,
     /// CHECK: Deprecated by Raydium but retained in its CPI layout.
     pub protocol_position: UncheckedAccount<'info>,
     #[account(mut)]
-    pub raydium_pool_vault_0: InterfaceAccount<'info, InterfaceTokenAccount>,
+    pub raydium_pool_vault_0: Box<InterfaceAccount<'info, InterfaceTokenAccount>>,
     #[account(mut)]
-    pub raydium_pool_vault_1: InterfaceAccount<'info, InterfaceTokenAccount>,
+    pub raydium_pool_vault_1: Box<InterfaceAccount<'info, InterfaceTokenAccount>>,
     #[account(mut)]
     pub tick_array_lower: AccountLoader<'info, TickArrayState>,
     #[account(mut)]
     pub tick_array_upper: AccountLoader<'info, TickArrayState>,
     #[account(address = vault_state_0.token_mint)]
-    pub vault_mint_0: InterfaceAccount<'info, InterfaceMint>,
+    pub vault_mint_0: Box<InterfaceAccount<'info, InterfaceMint>>,
     #[account(address = vault_state_1.token_mint)]
-    pub vault_mint_1: InterfaceAccount<'info, InterfaceMint>,
+    pub vault_mint_1: Box<InterfaceAccount<'info, InterfaceMint>>,
     pub admin: Signer<'info>,
     pub system_program: Program<'info, System>,
     pub token_program: Program<'info, Token>,

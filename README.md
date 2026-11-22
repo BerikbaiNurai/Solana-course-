@@ -1,40 +1,36 @@
-# Week 13 — Raydium CLMM Position
+# Week 13 — My Raydium CLMM Position
 
-This week I added a position controller to the liquidity vault. The vault program can open a Raydium CLMM position from two vault token accounts, collect the position fees back into those vaults, and close the position. A small keeper script checks the current pool tick and can close an out-of-range position before opening a new range around the current price.
+This week I worked on the next part of my vault. I added instructions so the vault can put two tokens into a Raydium CLMM pool, collect fees, and take its liquidity back out. I also wrote a small script that checks whether the pool price has moved outside my range. If it has, the script closes the old position and opens a new one around the current price.
 
-## Account flow
+## How I set it up
 
-```text
-Vault state 0 PDA -> vault token account 0 ─┐
-                                             ├─ Raydium CLMM position
-Vault state 1 PDA -> vault token account 1 ─┘         │
-                                                      ├─ Personal position (Raydium)
-Position controller PDA -> owns position NFT ─────────┘
-```
-
-- Each `VaultState` PDA controls one SPL token account. The two vaults must hold the pool's token 0 and token 1, in Raydium's mint order.
-- `PositionState` is a PDA derived from both vault state addresses and the pool address. It stores the active NFT mint, Raydium personal-position account, selected tick range, and NFT generation.
-- Raydium owns the personal-position account. The vault program's position-controller PDA owns the position NFT, so an admin cannot move the NFT or withdraw liquidity directly.
-- The vault administrator pays rent and authorizes each management instruction. Before the open CPI, each vault PDA grants the admin a one-transaction-sized token delegate allowance; the program revokes both allowances in the same instruction.
-
-## Instructions
-
-- `initialize_position_controller` creates the controller PDA once for a pair of vaults and a pool.
-- `open_clmm_position` validates the vaults against the pool mints, validates the range and available balances, and opens the Raydium position by CPI. The amounts are maximum token amounts in base units.
-- `collect_clmm_fees` calls Raydium's decrease-liquidity instruction with zero liquidity. Raydium updates the fee growth and transfers any accrued fees to the two vault token accounts.
-- `close_clmm_position` removes all liquidity, collects the accrued fees, closes the Raydium position, and increments the NFT generation so a new position can be opened.
-- `rebalance` is a keeper action in the TypeScript client. It checks the current tick; if price has left the stored range, it closes the old position and opens a new range around the current tick. It sends no transaction while the position remains in range.
-
-## Devnet setup
-
-I used the test pair and CLMM pool from Week 12:
+I used the test tokens and pool from Week 12:
 
 - Token A: [`7S6KLpGa4HjC4BtuQKsrmufKcUtky7WTn7jwDM1Pnj2E`](https://explorer.solana.com/address/7S6KLpGa4HjC4BtuQKsrmufKcUtky7WTn7jwDM1Pnj2E?cluster=devnet)
 - Token B: [`HxxdDXKJN3n3kWfutQ1PjTkHXFHtvHqNz9atwLEu3Kvh`](https://explorer.solana.com/address/HxxdDXKJN3n3kWfutQ1PjTkHXFHtvHqNz9atwLEu3Kvh?cluster=devnet)
-- Raydium CLMM pool: [`3R29TR1M6hmJAPF3QfiKkErMowhEHHpvprRdKecLBSmt`](https://explorer.solana.com/address/3R29TR1M6hmJAPF3QfiKkErMowhEHHpvprRdKecLBSmt?cluster=devnet)
+- Raydium pool: [`3R29TR1M6hmJAPF3QfiKkErMowhEHHpvprRdKecLBSmt`](https://explorer.solana.com/address/3R29TR1M6hmJAPF3QfiKkErMowhEHHpvprRdKecLBSmt?cluster=devnet)
 - Vault program: [`7deCasDiUCe9D4T4QD8RYMzxMameRDpeE1yZAv4J3o4S`](https://explorer.solana.com/address/7deCasDiUCe9D4T4QD8RYMzxMameRDpeE1yZAv4J3o4S?cluster=devnet)
 
-Use a devnet wallet that is the admin of both vaults. Do not put its keypair or seed phrase in this repository. Set the wallet and RPC locally:
+The vault program owns each token account through a PDA. I made a second vault for Token B so the position can use both sides of the pool. A separate position-controller PDA owns Raydium's position NFT. This means the vault program can manage the position without giving the NFT to my wallet.
+
+```text
+Token A vault PDA ─┐
+                   ├─ Raydium position
+Token B vault PDA ─┘          │
+Position controller PDA ──────┘ owns the position NFT
+```
+
+## What I added
+
+- `initialize_position_controller` makes one controller account for my two vaults and the selected pool.
+- `open_clmm_position` checks the token mints, range, and available balances, then calls Raydium from the program. It only allows the specified maximum amounts to be transferred.
+- `collect_clmm_fees` asks Raydium to update the position and sends collected fees back to the two vault token accounts.
+- `close_clmm_position` removes all liquidity, collects any remaining fees, closes the old position, and prepares the controller for a new one.
+- The `rebalance` script checks the current pool tick. If the price is still in range, it does nothing. If the price has left the range, it closes the position and opens a new one around the current price.
+
+## Running it on devnet
+
+I use the same devnet wallet that administers both vaults. I set these variables in my terminal and install the packages:
 
 ```bash
 export ANCHOR_PROVIDER_URL=https://api.devnet.solana.com
@@ -42,14 +38,7 @@ export ANCHOR_WALLET="$HOME/.config/solana/id.json"
 yarn install --frozen-lockfile
 ```
 
-Build and deploy the program before using the new instructions:
-
-```bash
-yarn build:sbf
-yarn deploy:devnet
-```
-
-The sample A vault already exists from Week 12. Create the B vault and deposit enough of both tokens for the chosen range. The setup command also creates the admin's user card:
+The Token A vault is from Week 12. I create a vault for Token B and deposit some of each token. I need enough of both tokens for the range I choose:
 
 ```bash
 yarn setup:devnet HxxdDXKJN3n3kWfutQ1PjTkHXFHtvHqNz9atwLEu3Kvh
@@ -57,7 +46,14 @@ yarn deposit:devnet 7S6KLpGa4HjC4BtuQKsrmufKcUtky7WTn7jwDM1Pnj2E 2
 yarn deposit:devnet HxxdDXKJN3n3kWfutQ1PjTkHXFHtvHqNz9atwLEu3Kvh 2
 ```
 
-The pool mint order must match the SDK output (`mintA` then `mintB`). If the pool reports the opposite order for another pair, pass the corresponding vault mints in that order.
+Before using the new instructions, I build and deploy the updated program:
+
+```bash
+yarn build:sbf
+yarn deploy:devnet
+```
+
+Then I create the position controller and open a range. The two mint arguments must be in the same order as the pool's Token A and Token B. The price values mean Token B per Token A. The last two values are maximum amounts in base units; for six-decimal tokens, `1000000` is one token.
 
 ```bash
 POOL=3R29TR1M6hmJAPF3QfiKkErMowhEHHpvprRdKecLBSmt
@@ -66,34 +62,39 @@ MINT_1=HxxdDXKJN3n3kWfutQ1PjTkHXFHtvHqNz9atwLEu3Kvh
 
 yarn clmm:position init "$POOL" "$MINT_0" "$MINT_1"
 yarn clmm:position open "$POOL" "$MINT_0" "$MINT_1" 0.8 1.25 1000000 1000000
+```
+
+I can collect fees and close the position with these commands:
+
+```bash
 yarn clmm:position collect "$POOL" "$MINT_0" "$MINT_1"
 yarn clmm:position close "$POOL" "$MINT_0" "$MINT_1"
 ```
 
-The range values are token B per token A. `1000000` is one token with six decimals. The pool must have been created with active liquidity in a range that includes the selected range. Fee collection depends on swaps having occurred while the position was active; it can correctly collect zero if no fees accrued.
+The pool needs trades for fees to build up. If no swaps happen while the position is active, there may be nothing to collect.
 
-To let the keeper close and replace the position only after the price leaves the range, leave a position open and run:
+To check whether the price left my range and move the position if needed, I run:
 
 ```bash
 yarn clmm:position rebalance "$POOL" "$MINT_0" "$MINT_1" 5 1000000 1000000
 ```
 
-`5` selects a new range about five percent wide on either side of the current tick. The keeper signs with the vault admin wallet and pays transaction fees. It checks the pool each time it runs; it is not a continuously running on-chain price monitor.
+Here `5` sets the new range around the current tick. This script is a simple keeper that I run when I want to check the price; Solana programs do not wake up by themselves when the market moves.
 
-## Checks and deployment status
+## What I checked
 
-I ran the Anchor IDL feature check and the TypeScript type check while adding these instructions. The checked-in `idl/liquidity_vault.json` includes the Week 13 instruction and account definitions.
+The Rust program passes `cargo check --features idl-build --locked` and the SBF build completes without stack-frame errors. The TypeScript files also pass `npx tsc --noEmit`.
 
-The devnet program upgrade and Week 13 position transactions still need to be run before I can add finalized transaction links here. I will only mark those operations complete after the explorer shows the confirmed signatures.
+I have not added Week 13 Devnet transaction links yet. I checked the program on Devnet and found that its upgrade authority is `A4LCC3q4PZt3orzGqowwMyJE23Xb5hxg1aizq3DRpucj`, while the wallet available to me is `DLgXdGoVya6j8iL4dnM75JxxbPA31XJLt28kJaUAMi4y`. I need the wallet that controls the upgrade authority to deploy these changes to the existing program. Until then, I cannot confirm the position, fee collection, close, or rebalance transactions on Explorer.
 
 ## What I learned
 
-- A CLMM position is an NFT-controlled account, so the vault needs to own the NFT through a PDA if the vault is meant to manage that liquidity.
-- The vault approves only bounded transfers for opening a position and revokes those allowances immediately after the Raydium CPI.
-- Collecting fees and withdrawing liquidity are separate actions; closing the position does both in sequence.
-- A program cannot wake itself up when a price moves. A keeper has to check the pool and submit the close-and-reopen transactions.
+- The position NFT has to stay with the vault controller if the vault is going to manage the Raydium position.
+- The vault only gives the CPI permission to use the maximum token amounts I set, then removes that permission.
+- A position can earn fees only while swaps happen in the pool.
+- I need a keeper script to notice when the price leaves the range and send the transactions to move the position.
 
-## References
+## Links I used
 
 - [Raydium CLMM instructions](https://docs.raydium.io/products/clmm/instructions)
 - [Raydium CLMM program](https://github.com/raydium-io/raydium-clmm)
