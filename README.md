@@ -96,6 +96,8 @@ Here are the transactions I used:
 
 The fee collection happened after a swap while the position was active. Only Token A had a small fee to collect; the amount was 87 base units, or `0.000087` tokens with six decimals. Devnet test tokens do not have real value.
 
+I checked the token-account balance changes in the [close-position transaction](https://explorer.solana.com/tx/4tHCbErjWLch1Ypb6Cx16AsRqwTeNeSpBwZLVRWTg9asW7xPE3vhGn7hvVAgXXFq4mzDhEnhL2Yd3sKeinhCsHM4). It returned `1.499999` Token A and `1.529882` Token B to the vault token accounts. Token A's vault balance changed from `990.500000` to `991.999999`; Token B's changed from `0.470117` to `1.999999`. These amounts are from the finalized transaction's pre- and post-token balances.
+
 ## What I learned
 
 - The position NFT has to stay with the vault controller if the vault is going to manage the Raydium position.
