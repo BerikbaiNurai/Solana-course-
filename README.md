@@ -42,7 +42,7 @@ The last swap argument is slippage in basis points: `100` means 1%. The script q
 
 ## Devnet results
 
-The program upgrade and all Week 12 demo transactions below are finalized on devnet with no transaction errors.
+The setup and successful swap transactions below are finalized on Devnet. I also sent one intentional negative test with a minimum output above the quote; Raydium rejected it with `TooLittleOutputReceived`, as expected.
 
 - Vault program upgrade: [transaction](https://explorer.solana.com/tx/7bFF65ek6Rbk8A1EiL8bQhXeTtribuZ5xhqFcWaZmdfWhyhNcsGDSmyUtyGJUgTRVwvXA5Wakno7GyTD6U3PKu4?cluster=devnet) · [program](https://explorer.solana.com/address/7deCasDiUCe9D4T4QD8RYMzxMameRDpeE1yZAv4J3o4S?cluster=devnet)
 - W11A mint: [creation and mint transaction](https://explorer.solana.com/tx/4Jz6SNEBdLjWhp9fHZVCX4p3vbinXXTHu3Z3iRwxK5MdrS52bW5zzo534YpbMKsGpiiVLWbrSY8kSUin2qDVwZFk?cluster=devnet)
@@ -54,8 +54,13 @@ The program upgrade and all Week 12 demo transactions below are finalized on dev
 - Deposit of 1,000 W11A and share minting: [transaction](https://explorer.solana.com/tx/5FqWnFYUNxQWgzKMG225DBqPT65PwU8SzESLNnpjahnXruH73M2U3WggoYaw7DfEJQxwmAB2gd8B4Fz4dxSk6qZn?cluster=devnet)
 - Vault state: [account](https://explorer.solana.com/address/5J7HsLtkxT74gxQTf4C2ivK67AtDxF17mmUcZdVDAaSE?cluster=devnet) · token vault: [account](https://explorer.solana.com/address/985E6fVDu4FxMPyyNP6nXqzrZm8vXjrcKGHkE3k2fjHz?cluster=devnet) · share mint: [account](https://explorer.solana.com/address/DLp14Xdvqb3PDFkGwTqSvzjzYjvTRuxtxWwVf63edbKt?cluster=devnet) · user card: [account](https://explorer.solana.com/address/8CLtAbdrLo1PWofHxkX2Mvmy7yXjBtdoqGXjEmRhZVqV?cluster=devnet)
 - Vault-to-CLMM swap: [transaction](https://explorer.solana.com/tx/58vJPbFuZtt8EAaBFeN8p85T9Pq6oxx4n8zQjgJi8RHtxThQwDFKMKCGPoepbDQTabbitod2SQbieq5HBh561Zti?cluster=devnet)
+- Swap rejected by the slippage check: [failed transaction details](https://explorer.solana.com/tx/2EtEEuE2oqkLxhu9ZyvCfNtdKrd86cSTYFtaaFmCMdN4cBrTBDfBK61RUd6V3vSsnQR9gQRHg5kP2WZpQ58K1kXu?cluster=devnet)
 
-For the 10 W11A exact-input swap, the quote was 9.972097 W11B, `min_amount_out` was 9.872376 W11B (1% slippage), and the user received 9.972097 W11B. After the swap, the vault and share supply each held 990 W11A-equivalent tokens (990,000,000 base units). I also checked the confirmed account data and the transaction's finalized status.
+For the successful 10 W11A exact-input swap, the quote and received amount were both 9.972097 W11B. I set `min_amount_out` to 9.872376 W11B, allowing 1% slippage. The pool started at 1 W11B per W11A (tick 0). Raydium's swap event recorded a post-swap tick of `-6` and a spot price of about `0.999418 W11B per W11A`, a decrease of about `0.0582%`. The event also recorded the exact `sqrt_price_x64` after the swap. The trade therefore moved the pool price slightly while staying within the chosen minimum output.
+
+For the negative test, I swapped an exact input of `0.1 W11A`. The quote was `0.097707 W11B`, but I deliberately set `min_amount_out` to `0.195414 W11B`, twice the quote. Raydium rejected the transaction with `TooLittleOutputReceived` (error 6018). The transaction is finalized as a failed transaction, and the vault token balance, share balance, output token balance, and pool account data were unchanged. This demonstrates that the minimum output is enforced on-chain and the swap rolls back atomically when it is not met.
+
+After the successful 10 W11A swap, the vault and share supply each held 990 W11A-equivalent tokens (990,000,000 base units). I checked the transaction metadata, Raydium event, account balances, and final transaction status on Devnet.
 
 ## What I learned
 
