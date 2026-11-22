@@ -9,6 +9,7 @@ I'm building a Liquidity Vault as I work through the course. I keep each week's 
 - [Week 10 — CPI withdrawals](https://github.com/BerikbaiNurai/Solana-course-/tree/week-10) · [Week 10 README](https://github.com/BerikbaiNurai/Solana-course-/blob/week-10/README.md)
 - [Week 11 — AMM and Raydium CLMM](https://github.com/BerikbaiNurai/Solana-course-/tree/week-11) · [Week 11 README](https://github.com/BerikbaiNurai/Solana-course-/blob/week-11/README.md)
 - [Week 12 — Swap through Raydium CLMM](https://github.com/BerikbaiNurai/Solana-course-/tree/week-12) · [Week 12 README](https://github.com/BerikbaiNurai/Solana-course-/blob/week-12/README.md)
+- [Week 13 — Raydium CLMM position](https://github.com/BerikbaiNurai/Solana-course-/tree/week-13) · [Week 13 README](https://github.com/BerikbaiNurai/Solana-course-/blob/week-13/README.md) · In progress
 
 ## What I built each week
 
@@ -17,5 +18,6 @@ I'm building a Liquidity Vault as I work through the course. I keep each week's 
 - **Week 10:** I added withdrawals. The program burns the user's shares and transfers the proportional SPL token amount from the vault through a Token Program CPI signed by the vault PDA. The branch includes 12 integration scenarios tested on localnet.
 - **Week 11:** I created two SPL test tokens on devnet and initialized a Raydium CLMM pool at a 1:1 starting price. The branch README has the mint, pool, and transaction links.
 - **Week 12:** I added an exact-input swap from the vault through Raydium CLMM. The instruction burns the user's matching shares and enforces `min_amount_out`. I created a funded test pool, deposited W11A, and finalized a swap with a 1% slippage limit. The [Week 12 README](https://github.com/BerikbaiNurai/Solana-course-/blob/week-12/README.md) has the account and transaction links.
+- **Week 13:** I added vault-managed CLMM position, fee collection, close, and keeper rebalance instructions with a TypeScript client. Rust and TypeScript compile checks pass. The Devnet upgrade and position transactions are still pending; the [Week 13 README](https://github.com/BerikbaiNurai/Solana-course-/blob/week-13/README.md) explains the current status.
 
 Each branch has its own code and README. Open the README for a week to see how I built and checked that part of the project.
